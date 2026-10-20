@@ -1,0 +1,6 @@
+services:
+  eda:
+    build: .
+    container_name: eda-taxi
+    volumes:
+      - ./data-contenedor:/app/starter/figuras
