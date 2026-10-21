@@ -10,7 +10,7 @@ os.makedirs("figuras", exist_ok=True)
 # Snowflake ya no esta disponible. estacion_codigo se lee como texto porque
 # hay codigos de estacion doble como "271-272".
 datos = pd.read_csv(
-    "../../../data/processed/flujo_estaciones_2026_08.csv",
+    "../data/flujo_estaciones_2026_08.csv",
     dtype={"estacion_codigo": str},
 )
 
