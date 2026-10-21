@@ -19,7 +19,7 @@ RAIZ = os.path.abspath(os.path.join(AQUI, "..", "..", ".."))  # data-science-end
 DATOS = os.path.abspath(os.path.join(RAIZ, "..", "..", "datos_ecobici"))  # carpeta fuera del repo
 VIAJES = os.path.join(DATOS, "raw", "viajes", "public_data_web_2026-08_2.csv")
 GBFS = os.path.join(DATOS, "raw", "gbfs", "station_information.json")
-SALIDA = os.path.join(RAIZ, "data", "processed", "flujo_estaciones_2026_08.csv")
+SALIDA = os.path.join(AQUI, "..", "data", "flujo_estaciones_2026_08.csv")
 os.makedirs(os.path.dirname(SALIDA), exist_ok=True)
 
 
