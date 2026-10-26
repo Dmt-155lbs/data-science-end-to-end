@@ -88,15 +88,20 @@ python3 ejercicio2_pipeline.py
 
 **Respuesta 1:** ¿cuántas columnas quedan después de preparar los datos? Explica de dónde sale ese número a partir de los tres grupos de columnas.
 
-_(tu respuesta)_
+Quedan 25 columnas (entrenamiento 2380 x 25, prueba 595 x 25). Salen de los tres grupos:
+- Numéricas: 2 (`distancia_km` y `pasajeros`), imputadas y escaladas, siguen siendo una columna cada una.
+- Categóricas: 18, porque one-hot crea una columna por cada categoría vista en entrenamiento: 8 zonas de origen + 8 zonas de destino + 2 métodos de pago.
+- Ya listas: 5 (`hora_sin`, `hora_cos`, `es_fin_de_semana`, `es_hora_pico`, `es_tarifa_fija`), pasan sin cambios.
+
+2 + 18 + 5 = 25.
 
 **Respuesta 2:** ¿las medianas que aprendió el imputador coinciden con las de entrenamiento o con las de todo el dataset? ¿Qué demuestra eso?
 
-_(tu respuesta)_
+Coinciden con las de entrenamiento: el imputador aprendió `distancia_km` = 6.94 y `pasajeros` = 1.0, iguales a las medianas de entrenamiento, mientras que la mediana de la distancia en todo el dataset es 6.93. Eso demuestra que el `ColumnTransformer` aprendió sus estadísticas solo con entrenamiento: las filas de prueba no influyeron en cómo se rellenan los faltantes, que es justo lo que evita la fuga del Ejercicio 1.
 
 **Respuesta 3:** ¿qué le pasa al viaje desde el Bronx? ¿Qué habría pasado con `pd.get_dummies` aplicado por separado a ese viaje?
 
-_(tu respuesta)_
+El Bronx no apareció en entrenamiento, así que el `OneHotEncoder` con `handle_unknown="ignore"` lo transforma en 0 en las 8 columnas de `zona_origen` (ninguna queda en 1), sin error y conservando las mismas 25 columnas; el modelo lo trata como "ninguna de las zonas conocidas". Con `pd.get_dummies` aplicado por separado a ese viaje se habría creado una sola columna nueva, `zona_origen_Bronx`, y habrían faltado todas las demás: el viaje tendría un número y un orden de columnas distinto al del entrenamiento, y el modelo fallaría o, peor, interpretaría columnas equivocadas.
 
 ## Ejercicio 3: el pipeline de tu proyecto
 
