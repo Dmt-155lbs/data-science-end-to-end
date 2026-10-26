@@ -111,19 +111,38 @@ Usa tu archivo con las 2 features de la sesión pasada y la plantilla [`plantill
 
 Escribe qué columnas son numéricas, cuáles categóricas y cuáles ya están listas, y cuál es el objetivo. Deja fuera toda columna que no exista al momento de predecir.
 
-_(tu clasificación)_
+Proyecto: flujo de estaciones de Ecobici, agosto de 2026, con las 2 features de la sesión pasada. Pipeline en [`plantilla-pipeline/pipeline_proyecto.py`](./plantilla-pipeline/pipeline_proyecto.py).
+
+- **Objetivo:** `y_salidas_prox_30m` (salidas en los próximos 30 minutos). Se quitan las filas sin objetivo (la última franja de cada estación).
+- **Numéricas (9):** `salidas`, `llegadas`, `salidas_lag_15m`, `salidas_ultima_hora`, `salidas_mismo_momento_ayer`, `salidas_hora_por_capacidad`, `capacidad`, `hora`, `dia_semana`. Se imputan con la mediana (los rezagos tienen NaN al inicio de cada serie) y se escalan.
+- **Categóricas (1):** `periodo_demanda`, imputada con el valor más frecuente y codificada con one-hot (`handle_unknown="ignore"`).
+- **Ya listas (1):** `es_fin_de_semana`, booleana pasada como 0/1.
+- **Fuera:** todo lo que no existe al predecir o no aporta: las columnas `y_*` (futuro), `flujo_neto` y `franja` por redundantes, e identificadores y texto (`estacion_codigo`, `nombre`, `fecha`, `latitud`, `longitud`). `estacion_codigo` se deja fuera porque en one-hot agregaría 100 columnas y la capacidad y los rezagos ya describen a cada estación.
 
 ### Paso 2: decide cómo dividir (5 minutos)
 
 ¿Tu modelo predice el futuro a partir de filas con fecha? Si sí, divide por fecha; si no, al azar. Justifica.
 
-_(tu decisión)_
+Por fecha. El modelo predice el futuro de cada estación a partir de filas con fecha y hora: entrenamiento son los días 1 al 24 de agosto y prueba los días 25 al 31 (aproximadamente 77% / 23%). Una división al azar mezclaría franjas vecinas de la misma estación: los rezagos de una fila de prueba y el objetivo de una fila de entrenamiento contigua cubren los mismos minutos, así que el modelo vería información del "futuro" de prueba al entrenar y la evaluación saldría optimista. Dividir por fecha imita lo que pasará en producción: entrenar con el pasado y predecir días que todavía no ocurrieron.
 
 ### Paso 3: construye y corre el pipeline (15 minutos)
 
 Completa la plantilla y córrela. Anota la forma de los conjuntos de entrenamiento y prueba ya preparados, y la lista de columnas que produce.
 
-_(lo que imprimió tu pipeline)_
+```
+Filas entrenamiento: 230400 Filas prueba: 67100
+Entrenamiento: (230400, 14) Prueba: (67100, 14)
+['numericas__salidas', 'numericas__llegadas', 'numericas__salidas_lag_15m',
+ 'numericas__salidas_ultima_hora', 'numericas__salidas_mismo_momento_ayer',
+ 'numericas__salidas_hora_por_capacidad', 'numericas__capacidad', 'numericas__hora',
+ 'numericas__dia_semana', 'categoricas__periodo_demanda_madrugada',
+ 'categoricas__periodo_demanda_pico_manana', 'categoricas__periodo_demanda_pico_tarde',
+ 'categoricas__periodo_demanda_resto', 'ya_listas__es_fin_de_semana']
+Medianas iguales a las de entrenamiento: True
+NaN restantes: 0
+```
+
+14 columnas = 9 numéricas + 4 de one-hot de `periodo_demanda` + 1 ya lista. Las medianas del imputador coinciden con las de entrenamiento (no hay fuga) y no quedan faltantes.
 
 ## Antes de la próxima sesión
 
