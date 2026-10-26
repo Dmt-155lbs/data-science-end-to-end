@@ -85,15 +85,15 @@ python3 ejercicio2_features_zona.py
 
 **Respuesta 1:** ¿cuántos viajes tienen `es_tarifa_fija` en 1, y qué tarifa mínima y máxima tienen? ¿Qué te dice eso sobre lo que un modelo lineal puede aprender con esta columna?
 
-_(tu respuesta)_
+300 viajes tienen `es_tarifa_fija` en 1, y todos cuestan exactamente 70.0: la tarifa mínima y la máxima son iguales. Para esos viajes la tarifa no depende de la distancia ni de la duración. Un modelo lineal puede aprender con esta columna un ajuste propio para esos viajes (un coeficiente que los lleva hacia 70), en lugar de forzarlos a seguir la recta de precio por kilómetro; sin la columna, esos 300 viajes distorsionan la pendiente de la distancia para todos los demás. Aun así, como el efecto de la distancia sigue sumando, un modelo lineal no puede anular del todo la distancia en esos viajes; un árbol lo resolvería con una sola partición.
 
 **Respuesta 2:** ¿cuántas columnas crea one-hot para la zona de origen, y cuántas la codificación ordinal? Si el modelo es una regresión lineal, ¿cuál de las dos usarías, y por qué la otra le da información falsa?
 
-_(tu respuesta)_
+One-hot crea 8 columnas (una por cada zona de origen: Brooklyn, Harlem, JFK Airport, Lower Manhattan, Midtown, Queens, Upper East Side y Upper West Side); la codificación ordinal crea 1 sola columna, `origen_ordinal`, con valores del 0 al 7. Para una regresión lineal usaría one-hot. La ordinal le da información falsa porque el modelo multiplica el número por un coeficiente: asume que las zonas tienen un orden y que están igual de separadas (que Upper West Side, 7, "vale" siete veces más que Harlem, 1, o que Midtown, 4, está a medio camino entre Brooklyn y Upper West Side), cuando el número solo sale del orden alfabético.
 
 **Respuesta 3:** ¿qué columnas del dataset no existen al pedir el taxi? ¿Qué pasaría con el modelo si las usaras para entrenar?
 
-_(tu respuesta)_
+`duracion_min`, `metodo_pago`, `propina` y la propia `tarifa`, que es el objetivo. Las cuatro se conocen recién cuando el viaje termina (la distancia sí existe, porque la app la estima con la ruta). Si las usara para entrenar habría fuga de información: el modelo aprendería, por ejemplo, que la duración explica casi toda la tarifa y se vería excelente en la evaluación, pero en producción, al momento de pedir el taxi, esas columnas no existen y el modelo no podría usarse o sus predicciones se derrumbarían.
 
 ## Ejercicio 3: dos features para tu proyecto
 
