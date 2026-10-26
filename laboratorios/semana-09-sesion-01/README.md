@@ -22,17 +22,17 @@ A partir de la lectura previa:
 
 **Según el artículo, ¿qué diferencia a una feature que tiene sentido de negocio de una que solo mejora una métrica?**
 
-_(tu respuesta)_
+Una feature con sentido de negocio traduce un mecanismo real del dominio (una regla de precios, un comportamiento de los clientes, una restricción operativa) a una columna que se puede explicar y que sigue siendo válida cuando el modelo está en producción. Una feature que solo mejora la métrica puede estar capturando ruido, una coincidencia del conjunto de datos o información que no existe al momento de predecir: sube el número en la evaluación, pero nadie puede explicar por qué funciona y se rompe cuando cambian los datos.
 
 **Elige uno de los ejemplos del artículo: ¿qué conocimiento del negocio traduce a una columna, y cómo?**
 
-_(tu respuesta)_
+El patrón de convertir dos columnas crudas en una razón que el negocio ya usa para decidir: por ejemplo, en vez de darle al modelo el monto total gastado y el número de compras por separado, se crea el gasto promedio por compra (monto total / número de compras). El conocimiento de negocio es que lo que distingue a un cliente no es cuánto gastó en total, sino cuánto gasta cada vez; el modelo no tiene que "descubrir" esa división, se la damos hecha como una columna nueva.
 
 ## Pregunta de apertura
 
 La exploración encontró dos patrones que no existen como columnas: la tarifa fija entre JFK y Manhattan, y viajes que cuestan más por kilómetro a ciertas horas. El modelo solo ve columnas. ¿Cómo le das esa información?
 
-_(tu respuesta)_
+Construyendo columnas nuevas que hagan explícito cada patrón. Para la tarifa fija, una columna `es_tarifa_fija` que vale 1 cuando el viaje va de JFK a una zona de Manhattan o al revés; así el modelo puede asignarle a esos viajes un valor propio en lugar de aplicarles la regla de precio por distancia. Para el costo por kilómetro según la hora, columnas derivadas de `fecha_hora_inicio`: la hora, el día de la semana y un indicador `es_hora_pico`, que sí existen al pedir el taxi.
 
 ## Ejercicio 1: features de fecha y hora
 
@@ -45,33 +45,35 @@ python3 ejercicio1_features_tiempo.py
 
 **Respuesta 1 (TODO 4), antes de ver la solución:** si dejas la hora como un número del 0 al 23, ¿qué tan lejos queda la hora 23 de la hora 0 para un modelo que mide distancias entre números? ¿Y en el reloj?
 
-_(tu respuesta)_
+Como números, 23 y 0 quedan a 23 unidades de distancia, la mayor distancia posible entre dos horas, aunque en el reloj solo las separa 1 hora. Un modelo que mide distancias entre números creería que las 23:00 y las 00:00 son los momentos más distintos del día. Representando la hora como un punto en un círculo (`hora_sin`, `hora_cos`), 23 y 0 quedan tan cerca como 11 y 12: la salida da 0.26 en los dos casos.
 
 **Respuesta 2 (TODO 3):** sin el TODO 3, el Paso 4 muestra un solo grupo. Con la hora pico construida, ¿esperas que la tarifa por kilómetro sea más alta o más baja en hora pico? ¿Por qué, si la tarifa depende de la distancia y de la duración?
 
-_(tu respuesta)_
+Más alta. La tarifa no depende solo de la distancia sino también del tiempo: en hora pico hay tráfico, el taxi tarda más minutos por cada kilómetro y el taxímetro cobra ese tiempo extra. La salida lo confirma: la mediana de la tarifa por kilómetro sube de 3.22 fuera de hora pico a 3.52 en hora pico (alrededor de 9% más).
 
 **Respuesta 3:** la duración del viaje no existe al pedir el taxi, pero la hora sí. ¿Qué parte de lo que la duración le diría al modelo puede traer `es_hora_pico`?
 
-_(tu respuesta)_
+La duración le diría al modelo cuánto tráfico hubo en el viaje, es decir, cuántos minutos se pagaron por cada kilómetro. `es_hora_pico` no sabe la duración real, pero sí sabe si el viaje empieza en un horario donde normalmente hay congestión, y eso existe al momento de pedir el taxi. Trae la parte "esperada" del efecto del tráfico sin filtrar información del futuro.
 
 **Lo que confirmó la salida, TODO por TODO:**
 
-_(anota la tarifa por kilómetro en cada grupo y las dos distancias del Paso 5)_
+- TODO 1 y 2: `hora`, `dia_semana` y `es_fin_de_semana` salen de `fecha_hora_inicio` (por ejemplo, el primer viaje, 2026-09-06 13:46, es hora 13, día 6 = domingo, fin de semana).
+- TODO 3: tarifa por km (mediana) = 3.22 fuera de hora pico (0) y 3.52 en hora pico (1). Antes de resolverlo había un solo grupo con 3.35.
+- TODO 4: Paso 5, 23 y 0: como número 23, como ciclo 0.26. 11 y 12: como número 1, como ciclo 0.26.
 
 ## Durante el ConcepTest
 
 **Tu voto, antes de discutir en pareja** (A, B, C o D):
 
-_(tu voto)_
+B
 
 **Tu razonamiento:**
 
-_(tu respuesta)_
+Elegí la opción que respeta el momento de la predicción: una feature solo sirve si existe cuando el modelo tiene que predecir, y su codificación depende del modelo que la va a consumir (por ejemplo, la hora como ciclo o en one-hot para un modelo lineal, mientras que un árbol puede trabajar con el número directamente). Las otras opciones o usaban información que solo se conoce al terminar el viaje, o asumían que una sola codificación sirve igual para cualquier modelo.
 
 **Después de discutir en pareja, ¿cambiaste de voto? ¿Por qué?**
 
-_(tu respuesta)_
+No. La discusión confirmó el criterio: primero se descartan las columnas que no existen al predecir, y después se elige la codificación según el modelo.
 
 ## Ejercicio 2: zona, codificación y disponibilidad
 
@@ -127,4 +129,4 @@ _(tu justificación)_
 
 Para escalar la distancia antes de entrenar, le restas la media y la divides por la desviación estándar. ¿Con qué viajes calculas esa media: con todos, o solo con los de entrenamiento? ¿Cambia algo?
 
-_(tu respuesta)_
+Solo con los de entrenamiento. Si la media y la desviación estándar se calculan con todos los viajes, el conjunto de prueba "le cuenta" al preprocesamiento cómo son sus datos antes de evaluar, y el error en prueba sale más optimista de lo que será en producción, donde los viajes nuevos no estaban cuando se calcularon esas estadísticas. Con la distancia el cambio numérico puede ser pequeño, pero conceptualmente es una fuga de información: la evaluación deja de medir lo que el modelo haría con datos nunca vistos.
