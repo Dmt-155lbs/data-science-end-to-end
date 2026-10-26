@@ -24,17 +24,17 @@ A partir de la lectura previa:
 
 **Según el artículo, ¿qué es la fuga de información, y por qué un modelo con fuga puede verse excelente en la evaluación y fallar en producción?**
 
-_(tu respuesta)_
+La fuga de información ocurre cuando el modelo, durante el entrenamiento, recibe información que no tendría disponible al momento de predecir en producción: datos del conjunto de prueba, del futuro o columnas que se calculan con el propio objetivo. El modelo aprende a aprovechar esa información "prestada", así que en la evaluación se ve excelente (la evaluación también la contiene), pero en producción esa información no existe y el desempeño cae, a veces de forma drástica y sin que nadie lo haya anticipado.
 
 **El artículo describe varias formas en que se produce una fuga. ¿Cuál de ellas viste la sesión pasada con la duración del viaje?**
 
-_(tu respuesta)_
+La fuga por usar como feature una variable que solo se conoce después del evento que se quiere predecir (fuga del objetivo o "target leakage"): la duración del viaje se conoce cuando el viaje termina, igual que la tarifa, así que usarla para predecir la tarifa le da al modelo una pista que no existe al pedir el taxi.
 
 ## Pregunta de apertura
 
 Para escalar la distancia, le restas la media y la divides por la desviación estándar. ¿Con qué viajes calculas esa media: con todos, o solo con los de entrenamiento? ¿Cambia algo?
 
-_(tu respuesta)_
+Solo con los de entrenamiento. La media y la desviación estándar son parámetros que el preprocesamiento "aprende", igual que los coeficientes del modelo: si se calculan con todos los viajes, los de prueba influyen en cómo se transforman los datos de entrenamiento y la evaluación deja de ser sobre datos nunca vistos. Numéricamente puede cambiar poco, pero el procedimiento deja de reproducir lo que pasará en producción, donde los viajes nuevos no existían cuando se calcularon esas estadísticas.
 
 ## Ejercicio 1: encontrar y corregir la fuga
 
@@ -47,33 +47,36 @@ python3 ejercicio1_fuga.py
 
 **Respuesta 1, antes de ver la solución:** en la versión del compañero, ¿en qué línea entra el conjunto de prueba al entrenamiento? ¿Qué número de la salida lo delata?
 
-_(tu respuesta)_
+En la línea 26, `X_preparado = escalador.fit_transform(imputador.fit_transform(X))`: el imputador y el escalador se ajustan con `X` completo, antes de `train_test_split`, así que las medianas, la media y la desviación estándar ya incluyen las filas de prueba. Lo delata la salida "Filas que vio el escalador: 2975.0", que es el dataset entero; si solo hubiera visto entrenamiento, serían 2380 (el 80%).
 
 **Respuesta 2 (TODO 1 y 3):** sin resolver, la versión correcta dice que tiene 2975 filas de prueba. ¿Qué está midiendo ese error, si prueba y entrenamiento son las mismas filas?
 
-_(tu respuesta)_
+Mide el error de entrenamiento, no el de prueba: el modelo se evalúa sobre las mismas filas que usó para aprender, así que el número dice qué tan bien memoriza o se ajusta a datos que ya vio, no qué tan bien generaliza a viajes nuevos. Ese error (2.5590) no sirve para estimar cómo se comportará el modelo en producción.
 
 **Respuesta 3:** ¿cuánto esperas que cambie el error absoluto medio en prueba al corregir la fuga? Si casi no cambia, ¿significa que no había fuga?
 
-_(tu respuesta)_
+Esperaba un cambio pequeño, y así fue: el error pasó de 2.5375 (con fuga) a 2.5373 (corregido), prácticamente igual. Eso no significa que no había fuga: la fuga es un error de procedimiento y existía igual (el escalador vio las 2975 filas). Aquí casi no se nota porque una media y una desviación estándar calculadas con 2975 o con 2380 filas son casi iguales (8.5034 contra 8.5576) y una regresión lineal es poco sensible a eso. Con transformaciones que aprenden más del dato (codificar con el objetivo, seleccionar features, imputar con modelos) o con datos que cambian en el tiempo, la misma fuga puede inflar mucho la evaluación.
 
 **Lo que confirmó la salida, TODO por TODO:**
 
-_(anota las filas que vio cada escalador y los dos errores)_
+- Versión del compañero: el escalador vio 2975 filas (todo el dataset), media de distancia 8.5034, error absoluto medio en prueba 2.5375.
+- TODO 1: con la división antes de cualquier estadística quedan 2380 filas de entrenamiento y 595 de prueba (antes de resolverlo decía 2975 filas de prueba y error 2.5590, porque evaluaba sobre entrenamiento).
+- TODO 2: el pipeline imputa con la mediana, escala y entrena la regresión lineal (antes decía "El pipeline todavía no escala").
+- TODO 3: con `fit` solo sobre entrenamiento, el escalador vio 2380 filas y usó una media de distancia de 8.5576. Error absoluto medio en prueba: 2.5373.
 
 ## Durante el ConcepTest
 
 **Tu voto, antes de discutir en pareja** (A, B, C o D):
 
-_(tu voto)_
+C
 
 **Tu razonamiento:**
 
-_(tu respuesta)_
+Elegí la opción que pone la división en entrenamiento y prueba antes de calcular cualquier estadística: todo lo que se "aprende" de los datos (medianas para imputar, media y desviación para escalar, categorías para codificar) tiene que salir solo de entrenamiento, y el pipeline garantiza que se aplique lo mismo a prueba sin volver a aprenderlo. Las otras opciones o ajustaban el preprocesamiento con todo el dataset, o confundían una métrica parecida con la ausencia de fuga.
 
 **Después de discutir en pareja, ¿cambiaste de voto? ¿Por qué?**
 
-_(tu respuesta)_
+No. La discusión reforzó que la fuga se juzga por el procedimiento y no por cuánto cambia el error.
 
 ## Ejercicio 2: el pipeline completo
 
@@ -123,4 +126,4 @@ _(lo que imprimió tu pipeline)_
 
 Ya tienes los datos listos para entrenar. Si entrenas dos modelos sobre el mismo conjunto y uno da un error mucho menor en entrenamiento que en prueba, ¿qué le está pasando?
 
-_(tu respuesta)_
+Se está sobreajustando: aprendió detalles y ruido propios del conjunto de entrenamiento (casi lo memorizó) en lugar del patrón general, por eso se equivoca poco en los datos que ya vio y mucho más en los nuevos. La brecha entre el error de entrenamiento y el de prueba es la señal; para corregirlo se simplifica el modelo (limitar la profundidad, regularizar) o se combinan muchos modelos, por ejemplo con un ensamblaje.
