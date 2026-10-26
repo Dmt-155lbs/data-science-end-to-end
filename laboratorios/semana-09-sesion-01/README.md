@@ -103,13 +103,31 @@ Usa el mismo archivo de la exploración de la Semana 8 y la plantilla [`plantill
 
 Escribe qué predice tu modelo y en qué momento: qué información existe en ese instante y cuál todavía no.
 
-_(tu respuesta)_
+Proyecto: flujo de estaciones de Ecobici (CDMX), agosto de 2026, 100 estaciones en franjas de 15 minutos (297,600 filas). El modelo predice `y_salidas_prox_30m`: cuántas bicicletas van a salir de una estación en los próximos 30 minutos, y la predicción se hace al cierre de cada franja de 15 minutos, para anticipar si una estación se va a vaciar.
+
+- **Existe en ese instante:** la estación y sus atributos fijos (código, ubicación, `capacidad`), la fecha, la hora, la franja, el día de la semana, si es fin de semana u hora pico, y todo el flujo ya observado: `salidas` y `llegadas` de la franja que acaba de cerrar, `salidas_lag_15m`, `salidas_ultima_hora` y `salidas_mismo_momento_ayer`.
+- **Todavía no existe:** las salidas y llegadas de los próximos 30 minutos (el objetivo) y cualquier columna calculada con ellas.
 
 ### Paso 2: construye las 2 features (15 minutos)
 
 Completa la plantilla con 2 columnas nuevas, derivadas de las existentes. Al menos una tiene que salir de uno de tus hallazgos de la exploración.
 
-_(el código de cada feature)_
+Las dos están en [`plantilla-features/features_proyecto.py`](./plantilla-features/features_proyecto.py):
+
+```python
+# Feature 1: periodo de demanda segun la hora.
+hora = datos["hora"]
+datos["periodo_demanda"] = np.select(
+    [hora < 5, (hora >= 7) & (hora <= 9), (hora >= 14) & (hora <= 18)],
+    ["madrugada", "pico_manana", "pico_tarde"],
+    default="resto",
+)
+
+# Feature 2: salidas de la ultima hora relativas a la capacidad de la estacion.
+datos["salidas_hora_por_capacidad"] = (
+    datos["salidas_ultima_hora"] / datos["capacidad"].clip(lower=1)
+)
+```
 
 ### Paso 3: justifica cada feature (5 minutos)
 
@@ -117,11 +135,11 @@ Para cada una: de qué hallazgo o conocimiento del dominio sale, qué evidencia 
 
 **Feature 1:**
 
-_(tu justificación)_
+`periodo_demanda` sale directamente del hallazgo de la exploración de la Semana 8: de 1 a 4 de la mañana prácticamente no hay salidas, y la demanda sube en la mañana (7 a 9) y en la tarde (14 a 18). La evidencia es la diferencia de promedios del objetivo por periodo: madrugada 0.02 salidas en los próximos 30 min, resto 1.39, pico de la mañana 2.27 y pico de la tarde 2.62 (el promedio general es 1.47). Existe al predecir porque solo usa la hora actual. Es categórica sin un orden real: para un modelo lineal (Ridge) usaría one-hot; para un ensamblaje de árboles también funciona con one-hot, y como son solo 4 categorías no agrega muchas columnas.
 
 **Feature 2:**
 
-_(tu justificación)_
+`salidas_hora_por_capacidad` sale del conocimiento del dominio: 5 salidas en una hora no significan lo mismo en una estación de 11 anclajes que en una de 40; dividir entre la capacidad mide qué tan "presionada" está la estación y hace comparables estaciones de distinto tamaño. La evidencia: su correlación con el objetivo es 0.541. Es algo menor que la de `salidas_ultima_hora` sola (0.600), porque el objetivo está en salidas absolutas y no en proporción; su valor es complementar a la variable cruda, no reemplazarla, y sirve sobre todo para el objetivo de alertas de estaciones vacías (que dependen de la capacidad). Existe al predecir porque usa solo la última hora ya observada y un atributo fijo de la estación; la capacidad mínima es 11, así que nunca divide entre 0. Es numérica, no necesita codificación (solo escalado para el modelo lineal).
 
 ## Antes de la próxima sesión
 
