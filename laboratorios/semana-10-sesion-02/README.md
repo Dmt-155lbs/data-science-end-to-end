@@ -98,7 +98,7 @@ Usé Claude en un chat nuevo, sin contexto. El costo es con 2 dólares por mill�
 
 **Respuesta 2:** corre el mismo prompt otra vez, en una conversación nueva. ¿Te dio los mismos 20 números? ¿Qué problema le trae eso a una app que le cobra al pasajero?
 
-_(tu respuesta)_
+No. En una conversación nueva (Claude Sonnet, sin contexto) solo 1 de los 20 números coincidió, y el error pasó de 1.1395 a 2.7335. El peor caso fue un viaje de JFK a Midtown de 37.29 km: la primera vez respondió la tarifa fija de 70 y la segunda 95, como si la tarifa dependiera de la distancia. Para una app que cobra, eso significa que el mismo viaje puede costar distinto según cuándo se pregunte, y que ni siquiera la regla fija está garantizada.
 
 **Respuesta 3:** busca en tus 20 respuestas la peor predicción del LLM. ¿Qué tiene de particular ese viaje? ¿Lo habría aprendido el ensamblaje con las 2380 filas de entrenamiento?
 
