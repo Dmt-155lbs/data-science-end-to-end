@@ -82,19 +82,19 @@ python3 ejercicio2_regularizacion.py
 
 **Respuesta 1:** ¿cuántas columnas recibe la regresión con interacciones de grado 3, y cuántas filas de entrenamiento hay? ¿Qué tiene que ver esa comparación con el error en prueba que obtuviste?
 
-_(tu respuesta)_
+Recibe 3275 columnas y hay 2380 filas de entrenamiento. Con más columnas que filas, la regresión puede ajustar el entrenamiento casi a la perfección de muchas formas, y fuera de esas filas sus predicciones se disparan: el error en prueba fue de 307 871 307.81.
 
 **Respuesta 2:** ¿qué cambió entre `lineal grado 3` y `ridge grado 3` en el error de entrenamiento, y qué cambió en el de prueba? ¿Por qué Ridge empeora un poco en entrenamiento?
 
-_(tu respuesta)_
+En entrenamiento pasó de 0.9138 a 1.0272, y en prueba de 307 871 307.81 a 1.3209. Ridge empeora un poco en entrenamiento porque penaliza los coeficientes grandes: ya no puede memorizar las filas, y a cambio generaliza.
 
 **Respuesta 3:** ¿qué modelo quedó mejor en prueba? ¿Cuánto mejor que la línea base?
 
-_(tu respuesta)_
+Gradient boosting, con 1.2754 en prueba. Son 11.26 dólares menos que la línea base (12.5308), cerca de 90% menos error.
 
 **Si terminas antes:** la brecha de la línea base es negativa (se equivoca menos en prueba que en entrenamiento). ¿Cómo puede pasar eso con un modelo que no aprende nada?
 
-_(tu respuesta)_
+La línea base no aprendió nada: da siempre la misma mediana. La brecha negativa solo refleja que, por azar de la división, las tarifas de prueba quedaron algo más cerca de esa mediana que las de entrenamiento.
 
 ## Ejercicio 3: los primeros modelos de tu proyecto
 
