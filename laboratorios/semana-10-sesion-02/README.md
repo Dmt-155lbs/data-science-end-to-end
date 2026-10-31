@@ -64,15 +64,15 @@ Parámetros de la red: 1729. Columnas más importantes del ensamblaje: `distanci
 
 **Tu voto, antes de discutir en pareja** (A, B, C o D):
 
-_(tu voto)_
+B
 
 **Tu razonamiento:**
 
-_(tu respuesta)_
+Elegí la opción que dice que la decisión no se toma solo por el error. Con errores parecidos (red neuronal 1.1695 y gradient boosting 1.2754 en prueba), pesan el costo de cada predicción, el tiempo de entrenamiento, que el mismo viaje dé siempre la misma tarifa y poder explicarla. El ensamblaje entrena en 0.2 s y deja ver que `distancia_km` y `es_tarifa_fija` mandan; la red son 1729 parámetros sin lectura directa, y un LLM cobra por cada consulta.
 
 **Después de discutir en pareja, ¿cambiaste de voto? ¿Por qué?**
 
-_(tu respuesta)_
+No. La discusión reforzó que, en datos tabulares con una etiqueta clara, el modelo clásico suele ser la mejor opción por costo y explicabilidad, y que un LLM tiene sentido cuando la entrada es texto o no hay datos etiquetados.
 
 ## Ejercicio 2: tres soluciones sobre los mismos 20 viajes
 
