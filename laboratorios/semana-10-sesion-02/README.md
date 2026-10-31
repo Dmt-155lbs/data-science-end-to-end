@@ -124,9 +124,16 @@ Elige 10 filas de tu conjunto de prueba y escribe un prompt con algunas filas de
 
 Una tabla con las tres opciones (métrica, costo, explicabilidad) y un párrafo que diga cuál usarías en tu proyecto y por qué, con los números de tu tabla.
 
-_(tu tabla)_
+| Opción | MAE en prueba (67 100 filas) | MAE en las 10 filas | Entrenamiento | Costo de predecir un mes | Explicabilidad |
+|---|---|---|---|---|---|
+| Gradient boosting | 1.0278 | 0.6670 | 15.8 s | Casi 0 | Alta: importancias y árboles |
+| Red neuronal (64 neuronas, 1025 parámetros) | 1.0209 | 0.6691 | 26.2 s | Casi 0 | Baja |
+| LLM (Claude Sonnet) | No medido | 0.4000 | 0 | Unos 28 dólares | Baja, y no da siempre lo mismo |
+| Persistencia (línea base) | 1.2278 | 0.9000 | 0 | 0 | Total |
 
-_(tu decisión)_
+El costo del LLM supone 100 estaciones cada 15 minutos (288 000 predicciones al mes), un prompt de unos 490 tokens por cada 10 filas y 2 dólares por millón de tokens de entrada.
+
+Usaría gradient boosting. Empata con la red en prueba (1.0278 contra 1.0209), entrena en una fracción del tiempo y permite explicar qué columnas mandan. El LLM ganó en las 10 filas (0.40), pero es una muestra mínima: cinco de esas filas tienen 0 salidas y el LLM responde enteros, lo que lo favorece justo en esos casos. Además, en la prueba de taxis no repitió sus propias respuestas. Para predecir cada 15 minutos en todas las estaciones, un modelo entrenado es más barato, más rápido y siempre da lo mismo con los mismos datos.
 
 ## Antes de la próxima sesión
 
@@ -134,4 +141,4 @@ _(tu decisión)_
 
 Dos compañeros reportan errores distintos para "el mismo" gradient boosting sobre los mismos datos de taxis. ¿Qué tendrías que saber de cada corrida para descubrir por qué no coinciden?
 
-_(tu respuesta)_
+Qué versión exacta de los datos usó cada uno, la división de entrenamiento y prueba con su semilla (`random_state`), los hiperparámetros y la semilla del modelo, las versiones de Python y de scikit-learn, y el commit del código que corrieron.

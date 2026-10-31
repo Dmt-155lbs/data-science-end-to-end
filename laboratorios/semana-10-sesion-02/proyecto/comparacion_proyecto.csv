@@ -1,0 +1,3 @@
+modelo,mae_prueba,mae_10_filas,segundos,parametros,iteraciones
+gradient boosting,1.0278,0.667,15.818,,
+red neuronal,1.0209,0.6691,26.225,1025.0,45.0

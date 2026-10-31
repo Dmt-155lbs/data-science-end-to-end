@@ -1,0 +1,47 @@
+Estimas cuantas bicicletas saldran de una estacion de Ecobici en los proximos 30 minutos. Cada fila es una estacion en una franja de 15 minutos: capacidad en anclajes, hora, dia_semana (1 es lunes, 7 es domingo), salidas y llegadas de la franja actual, salidas de la franja anterior, de la ultima hora y del mismo momento de ayer. Abajo hay 30 filas con su valor real y 10 sin el. Responde solo con 10 numeros, uno por linea, en el mismo orden, sin texto adicional. Si un valor falta, esta vacio.
+
+Filas con valor real:
+capacidad,hora,dia_semana,es_fin_de_semana,salidas,llegadas,salidas_lag_15m,salidas_ultima_hora,salidas_mismo_momento_ayer,salidas_prox_30m
+27,16,7,1,0,0,1.0,10.0,1.0,0.0
+27,7,3,0,0,0,0.0,0.0,0.0,1.0
+31,18,1,0,5,2,7.0,21.0,2.0,1.0
+15,15,2,0,0,1,1.0,7.0,4.0,1.0
+27,13,4,0,3,3,2.0,3.0,0.0,1.0
+23,10,4,0,0,0,0.0,1.0,1.0,1.0
+19,0,2,0,0,0,0.0,0.0,0.0,0.0
+59,12,3,0,0,0,0.0,1.0,0.0,0.0
+23,16,4,0,0,0,1.0,5.0,2.0,2.0
+19,22,2,0,0,0,1.0,2.0,1.0,0.0
+15,7,3,0,0,2,0.0,6.0,0.0,1.0
+27,20,2,0,1,0,0.0,2.0,1.0,0.0
+23,8,3,0,3,2,3.0,7.0,0.0,6.0
+27,9,1,0,1,0,0.0,4.0,0.0,5.0
+18,9,5,0,1,4,0.0,1.0,0.0,1.0
+59,12,1,0,3,2,2.0,10.0,0.0,4.0
+35,17,1,0,2,0,4.0,15.0,0.0,6.0
+27,12,6,1,0,0,1.0,4.0,0.0,3.0
+21,7,1,0,1,1,1.0,6.0,1.0,6.0
+23,5,3,0,0,0,0.0,0.0,0.0,0.0
+31,10,3,0,0,1,2.0,7.0,1.0,2.0
+26,0,1,0,0,0,0.0,2.0,0.0,0.0
+15,8,4,0,1,6,1.0,4.0,2.0,1.0
+23,1,6,1,0,0,0.0,0.0,0.0,0.0
+27,11,5,0,1,0,0.0,4.0,0.0,1.0
+19,3,6,1,0,0,0.0,0.0,0.0,0.0
+19,11,7,1,0,0,0.0,1.0,0.0,1.0
+27,20,4,0,1,0,0.0,5.0,6.0,1.0
+35,17,6,1,0,2,0.0,5.0,,6.0
+30,1,4,0,0,0,0.0,0.0,0.0,0.0
+
+Filas sin valor:
+capacidad,hora,dia_semana,es_fin_de_semana,salidas,llegadas,salidas_lag_15m,salidas_ultima_hora,salidas_mismo_momento_ayer
+23,20,3,0,0,1,0.0,3.0,0.0
+35,23,2,0,1,0,1.0,2.0,1.0
+37,3,7,1,0,0,0.0,0.0,0.0
+33,21,2,0,0,1,0.0,3.0,1.0
+19,7,1,0,0,0,2.0,8.0,0.0
+19,0,6,1,1,0,0.0,0.0,0.0
+39,1,5,0,0,0,0.0,0.0,0.0
+31,21,2,0,2,1,0.0,2.0,0.0
+31,16,4,0,2,0,1.0,5.0,0.0
+19,5,5,0,0,0,0.0,0.0,0.0
