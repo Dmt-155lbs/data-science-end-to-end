@@ -88,11 +88,13 @@ python3 ejercicio2_tres_soluciones.py
 
 **Respuesta 1:** ¿qué LLM usaste? Completa la tabla con los números de tu corrida.
 
+Usé Claude en un chat nuevo, sin contexto. El costo es con 2 dólares por millón de tokens de entrada.
+
 | | Error en los 20 viajes | Costo de entrenar | Costo de 10 000 viajes al mes | ¿Puedes explicar una predicción? |
 |---|---|---|---|---|
-| Gradient boosting | _(…)_ | _(…)_ | _(…)_ | _(…)_ |
-| Red neuronal | _(…)_ | _(…)_ | _(…)_ | _(…)_ |
-| LLM | _(…)_ | _(…)_ | _(…)_ | _(…)_ |
+| Gradient boosting | 0.8957 | 0.19 s | Casi 0 | Sí, con importancias y árboles |
+| Red neuronal | 0.9637 | 4.42 s | Casi 0 | Difícil: 1729 parámetros |
+| LLM (Claude) | 1.1395 | 0 | 0.73 dólares (Sonnet 5.5, solo entrada) | No de forma comprobable |
 
 **Respuesta 2:** corre el mismo prompt otra vez, en una conversación nueva. ¿Te dio los mismos 20 números? ¿Qué problema le trae eso a una app que le cobra al pasajero?
 
@@ -100,11 +102,11 @@ _(tu respuesta)_
 
 **Respuesta 3:** busca en tus 20 respuestas la peor predicción del LLM. ¿Qué tiene de particular ese viaje? ¿Lo habría aprendido el ensamblaje con las 2380 filas de entrenamiento?
 
-_(tu respuesta)_
+Fue un viaje de JFK a JFK de 1.01 km: el LLM dijo 7 dólares y el real era 11.46, un error de 4.46. Tiene poca distancia, pero sale y llega al aeropuerto. El gradient boosting, que entrenó con las 2380 filas, dio 12.74, un error de 1.28, así que este caso sí lo capturó mucho mejor que el LLM con 30 ejemplos.
 
 **Si terminas antes:** el error en los 20 viajes de muestra no es el mismo que en los 595 de prueba. ¿Por qué no se mide el LLM sobre los 595, y qué tan confiable es una comparación sobre 20?
 
-_(tu respuesta)_
+Porque habría que mandar los 595 viajes al LLM, con más costo y trabajo manual. Una comparación sobre 20 viajes es poco confiable: en los 20 ganó el ensamblaje (0.8957 contra 0.9637), y en los 595 ganó la red (1.1695 contra 1.2754). Con tan pocas filas, el orden puede cambiar por azar.
 
 ## Ejercicio 3: ¿qué solución conviene para tu proyecto?
 
