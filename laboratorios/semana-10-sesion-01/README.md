@@ -16,17 +16,17 @@ A partir de la lectura previa:
 
 **Según el artículo, ¿qué es un ensamblaje, y en qué se diferencian bagging y boosting en la forma de combinar sus modelos?**
 
-_(tu respuesta)_
+Un ensamblaje combina varios modelos para que sus errores se compensen. Bagging entrena muchos modelos en paralelo, cada uno con una muestra distinta de los datos, y promedia sus predicciones. Boosting los entrena en secuencia: cada modelo nuevo corrige los errores que dejaron los anteriores.
 
 **¿Por qué un promedio de muchos árboles puede equivocarse menos que el mejor de esos árboles por separado?**
 
-_(tu respuesta)_
+Porque cada árbol se equivoca de forma distinta. Al promediar, los errores en direcciones opuestas se cancelan y baja la varianza, mientras que lo que los árboles aprendieron en común se conserva.
 
 ## Pregunta de apertura
 
 Ya tienes los datos listos para entrenar. Si entrenas dos modelos sobre el mismo conjunto y uno da un error mucho menor en entrenamiento que en prueba, ¿qué le está pasando?
 
-_(tu respuesta)_
+Se está sobreajustando: aprendió detalles y ruido del conjunto de entrenamiento en lugar del patrón general, por eso falla en filas que no vio.
 
 ## Ejercicio 1: línea base, un árbol y un bosque
 
@@ -39,19 +39,24 @@ python3 ejercicio1_linea_base_y_ensamblaje.py
 
 **Respuesta 1 (TODO 1):** la línea base predice siempre la mediana de la tarifa. ¿Cuánto esperas que se equivoque en promedio? ¿Para qué sirve un modelo que no usa ninguna columna?
 
-_(tu respuesta)_
+Espero un error grande, de unos 12 dólares, porque responde lo mismo para un viaje corto y para uno a JFK. Salió 12.53 en prueba. Sirve como piso: un modelo que no le gana a esa regla no está aprendiendo nada útil.
 
 **Respuesta 2 (TODO 2):** un árbol sin límite puede seguir partiendo los datos hasta dejar un viaje por hoja. ¿Qué error esperas en entrenamiento, y qué esperas en prueba?
 
-_(tu respuesta)_
+En entrenamiento un error casi cero, porque memoriza cada viaje, y en prueba bastante peor. Salió 0.0029 en entrenamiento y 1.7017 en prueba.
 
 **Respuesta 3 (TODO 3 y 4):** ¿qué esperas que pase con la brecha entre entrenamiento y prueba al limitar la profundidad? ¿Y con 200 árboles promediados?
 
-_(tu respuesta)_
+Al limitar la profundidad la brecha baja mucho: de 1.70 a 0.26, y además mejora en prueba (1.27). Con 200 árboles esperaba el mejor resultado en prueba, pero no fue así: el bosque quedó en 1.30, con brecha 0.83, y el árbol limitado le ganó por poco.
 
 **Lo que confirmó la tabla, TODO por TODO:**
 
-_(anota el error en entrenamiento, en prueba y la brecha de cada modelo)_
+| Modelo | Entrenamiento | Prueba | Brecha |
+|---|---|---|---|
+| Línea base | 13.1998 | 12.5308 | -0.6690 |
+| Árbol sin límite | 0.0029 | 1.7017 | 1.6988 |
+| Árbol `max_depth=8` | 1.0098 | 1.2728 | 0.2630 |
+| Bosque aleatorio | 0.4739 | 1.3016 | 0.8276 |
 
 ## Durante el ConcepTest
 
