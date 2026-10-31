@@ -116,19 +116,19 @@ Una fila por modelo, con la métrica de tu proyecto en entrenamiento y en prueba
 
 **¿Cuál es tu línea base, y por qué esa y no otra?**
 
-_(tu respuesta)_
+Persistencia: los próximos 30 minutos iguales a los últimos 30 (la franja actual más la anterior). La elegí porque predigo una serie en el tiempo y esta regla aprovecha lo mismo que usa una persona que mira la estación. Una mediana constante sería demasiado fácil de superar, porque de madrugada casi no hay salidas.
 
 **¿Alguno de tus modelos se sobreajusta? Muestra la evidencia con números de tu tabla.**
 
-_(tu respuesta)_
+No. Las brechas son pequeñas: persistencia 0.0751, Ridge 0.0516 y gradient boosting 0.0539 (errores en prueba de 1.2278, 1.0632 y 1.0278). Hasta el modelo más flexible queda casi igual en entrenamiento (0.9739) que en prueba.
 
 **¿Qué regularización aplicaste (o por qué no hizo falta), y qué cambió en la tabla?**
 
-_(tu respuesta)_
+Ridge con `alpha=1.0` y gradient boosting con sus valores por defecto (`max_depth=3`). No probé otros valores: con brechas de 0.05 no hay sobreajuste que corregir, así que más regularización no tenía de dónde mejorar.
 
 **¿Cuánto mejora tu mejor modelo a la línea base?**
 
-_(tu respuesta)_
+Gradient boosting baja el error absoluto medio de 1.2278 a 1.0278: 0.20 salidas menos por predicción, 16.3% mejor que la línea base.
 
 ## Antes de la próxima sesión
 
@@ -136,4 +136,4 @@ _(tu respuesta)_
 
 Para estimar la tarifa de un viaje, podrías entrenar un ensamblaje, entrenar una red neuronal o escribirle a un LLM los datos del viaje y pedirle un número. ¿Qué tendrías que medir de cada opción, además del error, para decidir cuál usar en la app de taxis?
 
-_(tu respuesta)_
+Además del error: cuánto cuesta cada predicción, cuánto tarda en responder, si el mismo viaje da siempre la misma tarifa, si se puede explicar una tarifa al conductor y cuánto cuesta entrenarlo y mantenerlo.

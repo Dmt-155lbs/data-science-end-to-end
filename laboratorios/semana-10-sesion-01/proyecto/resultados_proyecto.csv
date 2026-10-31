@@ -1,0 +1,4 @@
+modelo,mae_entrenamiento,mae_prueba,brecha,segundos
+persistencia 30 min,1.1527,1.2278,0.0751,0.0
+ridge,1.0117,1.0632,0.0516,0.335
+gradient boosting,0.9739,1.0278,0.0539,17.552
