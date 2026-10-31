@@ -18,17 +18,17 @@ A partir de la lectura previa:
 
 **Según el artículo, ¿para qué tipo de datos y de problema conviene el aprendizaje automático clásico, y para cuál un LLM?**
 
-_(tu respuesta)_
+El aprendizaje clásico conviene con datos tabulares y estructurados, una etiqueta bien definida y un conjunto modesto, sobre todo si importan la latencia o la interpretabilidad. Un LLM conviene cuando la entrada es texto, la tarea exige razonar sobre contexto o no hay datos etiquetados.
 
 **El artículo compara las dos opciones en datos, costo y explicabilidad. ¿Cuál de esas tres diferencias pesa más para tu proyecto?**
 
-_(tu respuesta)_
+Los datos. Mi proyecto usa filas numéricas de estaciones con una etiqueta clara, que es justo el caso que el artículo asigna al aprendizaje clásico; eso pesa más que el costo o la explicabilidad.
 
 ## Pregunta de apertura
 
 Para estimar la tarifa de un viaje, podrías entrenar un ensamblaje, entrenar una red neuronal o escribirle a un LLM los datos del viaje y pedirle un número. ¿Qué tendrías que medir de cada opción, además del error, para decidir cuál usar en la app de taxis?
 
-_(tu respuesta)_
+Costo por predicción, tiempo de respuesta, si el mismo viaje da siempre la misma tarifa, si se puede explicar la predicción y cuánto cuesta entrenar y mantener cada opción.
 
 ## Ejercicio 1: una red neuronal frente al ensamblaje
 
@@ -41,19 +41,24 @@ python3 ejercicio1_red_neuronal.py
 
 **Respuesta 1 (TODO 1):** sin resolver, la red sale peor que el ensamblaje y aparece una advertencia `ConvergenceWarning`. ¿Qué crees que significa? ¿Qué esperas al dejarla entrenar hasta 1000 iteraciones?
 
-_(tu respuesta)_
+Significa que la red llegó al límite de iteraciones antes de que el entrenamiento se estabilizara, así que quedó sin terminar de aprender. Con 1000 iteraciones espero que el aviso desaparezca y el error baje. Bajó a 1.1695 en prueba y superó al ensamblaje.
 
 **Respuesta 2 (TODO 2):** una capa oculta de 64 neuronas recibe las 25 columnas preparadas y entrega una tarifa. ¿Cuántos números tiene que aprender?
 
-_(tu respuesta)_
+1729: 25 × 64 = 1600 pesos de entrada, 64 sesgos de la capa oculta, 64 pesos hacia la salida y 1 sesgo de salida.
 
 **Respuesta 3 (TODO 3):** ¿qué columna esperas que el ensamblaje use más? Si la app le muestra al conductor por qué la tarifa estimada es 70 dólares, ¿cuál de los dos modelos te permite responder?
 
-_(tu respuesta)_
+La distancia, y lo confirmó con 0.9824 de importancia. Para explicar los 70 dólares sirve más el ensamblaje: `es_tarifa_fija` es su segunda columna y el árbol deja ver esa decisión, mientras que la red son 1729 números sin una lectura directa. Las importancias son globales, así que explicar un viaje puntual exige además seguir sus árboles.
 
 **Lo que confirmó la salida, TODO por TODO:**
 
-_(anota el error y el tiempo de cada modelo, los parámetros de la red y las 3 columnas más importantes)_
+| Modelo | Entrenamiento | Prueba | Segundos |
+|---|---|---|---|
+| Gradient boosting | 1.0705 | 1.2754 | 0.2 |
+| Red neuronal | 1.0882 | 1.1695 | Entre 4 y 9 |
+
+Parámetros de la red: 1729. Columnas más importantes del ensamblaje: `distancia_km` (0.9824), `es_tarifa_fija` (0.0120) y `es_hora_pico` (0.0028).
 
 ## Durante el ConcepTest
 
