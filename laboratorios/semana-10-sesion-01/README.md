@@ -62,15 +62,15 @@ Al limitar la profundidad la brecha baja mucho: de 1.70 a 0.26, y además mejora
 
 **Tu voto, antes de discutir en pareja** (A, B, C o D):
 
-_(tu voto)_
+C
 
 **Tu razonamiento:**
 
-_(tu respuesta)_
+Elegí la opción que juzga a un modelo por su error en prueba y por la brecha con entrenamiento, no por el error en entrenamiento. El árbol sin límite lo muestra: 0.0029 en entrenamiento y 1.7017 en prueba, porque memorizó los viajes. Limitar la profundidad o promediar árboles sacrifica un poco de entrenamiento a cambio de generalizar, y la línea base da el piso que cualquier modelo tiene que superar.
 
 **Después de discutir en pareja, ¿cambiaste de voto? ¿Por qué?**
 
-_(tu respuesta)_
+No. La discusión confirmó el criterio, con un matiz que mostró la tabla: más complejidad no garantiza ganar. El bosque de 200 árboles (1.3016) quedó detrás del árbol con `max_depth=8` (1.2728), así que hay que medirlo en prueba y no suponerlo.
 
 ## Ejercicio 2: regularizar una regresión que se sobreajusta
 
