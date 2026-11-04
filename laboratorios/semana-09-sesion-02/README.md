@@ -16,7 +16,7 @@ python3 -c "import sklearn; print(sklearn.__version__)"
 
 Este laboratorio usa `sparse_output=False` en `OneHotEncoder`, disponible desde scikit-learn 1.2. El `requirements.txt` del repositorio ya fija una versión posterior.
 
-Ten a mano el script de features de tu proyecto de la sesión pasada.
+Ten a mano tu notebook de features de la sesión pasada. Los tres ejercicios de hoy son scripts, no notebooks: un pipeline de preparación es código de producción, que tiene que correr igual cada vez y que otros archivos importan. En el Ejercicio 3, la preparación de tu proyecto pasa del notebook donde la probaste a ese script.
 
 ## Antes de empezar
 
@@ -52,6 +52,18 @@ En la línea 26, `X_preparado = escalador.fit_transform(imputador.fit_transform(
 **Respuesta 2 (TODO 1 y 3):** sin resolver, la versión correcta dice que tiene 2975 filas de prueba. ¿Qué está midiendo ese error, si prueba y entrenamiento son las mismas filas?
 
 Mide el error de entrenamiento, no el de prueba: el modelo se evalúa sobre las mismas filas que usó para aprender, así que el número dice qué tan bien memoriza o se ajusta a datos que ya vio, no qué tan bien generaliza a viajes nuevos. Ese error (2.5590) no sirve para estimar cómo se comportará el modelo en producción.
+
+**Respuesta 3:** ¿cuánto esperas que cambie el error absoluto medio en prueba al corregir la fuga? Si casi no cambia, ¿significa que no había fuga?
+
+Esperaba un cambio pequeño, y así fue: el error pasó de 2.5375 (con fuga) a 2.5373 (corregido), prácticamente igual. Eso no significa que no había fuga: la fuga es un error de procedimiento y existía igual (el escalador vio las 2975 filas). Aquí casi no se nota porque una media y una desviación estándar calculadas con 2975 o con 2380 filas son casi iguales (8.5034 contra 8.5576) y una regresión lineal es poco sensible a eso. Con transformaciones que aprenden más del dato (codificar con el objetivo, seleccionar features, imputar con modelos) o con datos que cambian en el tiempo, la misma fuga puede inflar mucho la evaluación.
+
+**Respuesta 2 (TODO 1 y 3):** sin resolver, la versión correcta dice que tiene 2975 filas de prueba. ¿Qué está midiendo ese error, si prueba y entrenamiento son las mismas filas?
+
+Mide el error de entrenamiento, no el de prueba: el modelo se evalúa sobre las mismas filas que usó para aprender, así que el número dice qué tan bien memoriza o se ajusta a datos que ya vio, no qué tan bien generaliza a viajes nuevos. Ese error (2.5590) no sirve para estimar cómo se comportará el modelo en producción.
+
+**Respuesta 3:** ¿cuánto esperas que cambie el error absoluto medio en prueba al corregir la fuga? Si casi no cambia, ¿significa que no había fuga?
+
+Esperaba un cambio pequeño, y así fue: el error pasó de 2.5375 (con fuga) a 2.5373 (corregido), prácticamente igual. Eso no significa que no había fuga: la fuga es un error de procedimiento y existía igual (el escalador vio las 2975 filas). Aquí casi no se nota porque una media y una desviación estándar calculadas con 2975 o con 2380 filas son casi iguales (8.5034 contra 8.5576) y una regresión lineal es poco sensible a eso. Con transformaciones que aprenden más del dato (codificar con el objetivo, seleccionar features, imputar con modelos) o con datos que cambian en el tiempo, la misma fuga puede inflar mucho la evaluación.
 
 **Respuesta 3:** ¿cuánto esperas que cambie el error absoluto medio en prueba al corregir la fuga? Si casi no cambia, ¿significa que no había fuga?
 
@@ -103,11 +115,31 @@ Coinciden con las de entrenamiento: el imputador aprendió `distancia_km` = 6.94
 
 El Bronx no apareció en entrenamiento, así que el `OneHotEncoder` con `handle_unknown="ignore"` lo transforma en 0 en las 8 columnas de `zona_origen` (ninguna queda en 1), sin error y conservando las mismas 25 columnas; el modelo lo trata como "ninguna de las zonas conocidas". Con `pd.get_dummies` aplicado por separado a ese viaje se habría creado una sola columna nueva, `zona_origen_Bronx`, y habrían faltado todas las demás: el viaje tendría un número y un orden de columnas distinto al del entrenamiento, y el modelo fallaría o, peor, interpretaría columnas equivocadas.
 
-## Ejercicio 3: el pipeline de tu proyecto
+**Respuesta 2:** ¿las medianas que aprendió el imputador coinciden con las de entrenamiento o con las de todo el dataset? ¿Qué demuestra eso?
 
-Usa tu archivo con las 2 features de la sesión pasada y la plantilla [`plantilla-pipeline/pipeline_proyecto.py`](./plantilla-pipeline/pipeline_proyecto.py).
+Coinciden con las de entrenamiento: el imputador aprendió `distancia_km` = 6.94 y `pasajeros` = 1.0, iguales a las medianas de entrenamiento, mientras que la mediana de la distancia en todo el dataset es 6.93. Eso demuestra que el `ColumnTransformer` aprendió sus estadísticas solo con entrenamiento: las filas de prueba no influyeron en cómo se rellenan los faltantes, que es justo lo que evita la fuga del Ejercicio 1.
 
-### Paso 1: clasifica tus columnas (5 minutos)
+**Respuesta 3:** ¿qué le pasa al viaje desde el Bronx? ¿Qué habría pasado con `pd.get_dummies` aplicado por separado a ese viaje?
+
+El Bronx no apareció en entrenamiento, así que el `OneHotEncoder` con `handle_unknown="ignore"` lo transforma en 0 en las 8 columnas de `zona_origen` (ninguna queda en 1), sin error y conservando las mismas 25 columnas; el modelo lo trata como "ninguna de las zonas conocidas". Con `pd.get_dummies` aplicado por separado a ese viaje se habría creado una sola columna nueva, `zona_origen_Bronx`, y habrían faltado todas las demás: el viaje tendría un número y un orden de columnas distinto al del entrenamiento, y el modelo fallaría o, peor, interpretaría columnas equivocadas.
+
+**Respuesta 3:** ¿qué le pasa al viaje desde el Bronx? ¿Qué habría pasado con `pd.get_dummies` aplicado por separado a ese viaje?
+
+El Bronx no apareció en entrenamiento, así que el `OneHotEncoder` con `handle_unknown="ignore"` lo transforma en 0 en las 8 columnas de `zona_origen` (ninguna queda en 1), sin error y conservando las mismas 25 columnas; el modelo lo trata como "ninguna de las zonas conocidas". Con `pd.get_dummies` aplicado por separado a ese viaje se habría creado una sola columna nueva, `zona_origen_Bronx`, y habrían faltado todas las demás: el viaje tendría un número y un orden de columnas distinto al del entrenamiento, y el modelo fallaría o, peor, interpretaría columnas equivocadas.
+
+## Ejercicio 3: el pipeline de tu proyecto, como script
+
+Copia la plantilla [`plantilla-pipeline/pipeline_proyecto.py`](./plantilla-pipeline/pipeline_proyecto.py) a la carpeta de tu proyecto, al lado de tu notebook de features. Desde la próxima sesión, tus notebooks de modelos importan este archivo en vez de copiar su código:
+
+```python
+from pipeline_proyecto import cargar_y_dividir, construir_preparacion
+```
+
+### Paso 1: pasa tus features a `agregar_features` (5 minutos)
+
+Copia de tu notebook de la sesión pasada solo las líneas que construyen tus 2 features, dentro de la función `agregar_features`. Sin gráficos, sin `print` y sin las celdas que usaste para probar ideas: esas se quedan en el notebook, como evidencia de por qué elegiste cada feature.
+
+### Paso 2: clasifica tus columnas (5 minutos)
 
 Escribe qué columnas son numéricas, cuáles categóricas y cuáles ya están listas, y cuál es el objetivo. Deja fuera toda columna que no exista al momento de predecir.
 
@@ -119,15 +151,25 @@ Proyecto: flujo de estaciones de Ecobici, agosto de 2026, con las 2 features de 
 - **Ya listas (1):** `es_fin_de_semana`, booleana pasada como 0/1.
 - **Fuera:** todo lo que no existe al predecir o no aporta: las columnas `y_*` (futuro), `flujo_neto` y `franja` por redundantes, e identificadores y texto (`estacion_codigo`, `nombre`, `fecha`, `latitud`, `longitud`). `estacion_codigo` se deja fuera porque en one-hot agregaría 100 columnas y la capacidad y los rezagos ya describen a cada estación.
 
-### Paso 2: decide cómo dividir (5 minutos)
+### Paso 3: decide cómo dividir (5 minutos)
 
-¿Tu modelo predice el futuro a partir de filas con fecha? Si sí, divide por fecha; si no, al azar. Justifica.
+¿Tu modelo predice el futuro a partir de filas con fecha? Si sí, divide por fecha dentro de `cargar_y_dividir`; si no, al azar. Justifica.
 
 Por fecha. El modelo predice el futuro de cada estación a partir de filas con fecha y hora: entrenamiento son los días 1 al 24 de agosto y prueba los días 25 al 31 (aproximadamente 77% / 23%). Una división al azar mezclaría franjas vecinas de la misma estación: los rezagos de una fila de prueba y el objetivo de una fila de entrenamiento contigua cubren los mismos minutos, así que el modelo vería información del "futuro" de prueba al entrenar y la evaluación saldría optimista. Dividir por fecha imita lo que pasará en producción: entrenar con el pasado y predecir días que todavía no ocurrieron.
 
-### Paso 3: construye y corre el pipeline (15 minutos)
+En el script, el corte vive en `cargar_y_dividir`: entrenamiento hasta `ULTIMO_DIA_ENTRENAMIENTO = 24` y prueba del 25 en adelante.
 
-Completa la plantilla y córrela. Anota la forma de los conjuntos de entrenamiento y prueba ya preparados, y la lista de columnas que produce.
+### Paso 4: corre el script (10 minutos)
+
+Desde una terminal, en la carpeta de tu proyecto:
+
+```
+python3 pipeline_proyecto.py
+```
+
+Si corre de principio a fin en una terminal nueva, sin el notebook abierto, otro código ya lo puede importar. Anota la forma de los conjuntos de entrenamiento y prueba ya preparados, y la lista de columnas que produce.
+
+Las 2 features están en `agregar_features` y el script lee el mismo CSV de la exploración de la Semana 8. Desde [`plantilla-pipeline/`](./plantilla-pipeline/pipeline_proyecto.py):
 
 ```
 Filas entrenamiento: 230400 Filas prueba: 67100
@@ -142,7 +184,7 @@ Medianas iguales a las de entrenamiento: True
 NaN restantes: 0
 ```
 
-14 columnas = 9 numéricas + 4 de one-hot de `periodo_demanda` + 1 ya lista. Las medianas del imputador coinciden con las de entrenamiento (no hay fuga) y no quedan faltantes.
+14 columnas = 9 numéricas + 4 de one-hot de `periodo_demanda` + 1 ya lista. Las medianas del imputador coinciden con las de entrenamiento (no hay fuga) y no quedan faltantes. Los notebooks de la Semana 10 importan `cargar_y_dividir` y `construir_preparacion` de este archivo.
 
 ## Antes de la próxima sesión
 

@@ -14,7 +14,9 @@ pandas y matplotlib, de la sesión pasada. numpy se instala junto con pandas; ve
 python3 -c "import numpy; print(numpy.__version__)"
 ```
 
-Ten a mano tus 3 hallazgos de la exploración de la Semana 8, Sesión 2: las features de hoy salen de ahí.
+Ten a mano tu notebook de exploración de la Semana 8, Sesión 2: las features de hoy salen de tus 3 hallazgos.
+
+Los laboratorios de hoy siguen siendo notebooks: diseñar una feature es probar varias ideas y mirar cuál aporta. La próxima sesión, las features que se queden pasan a un script, que es lo que corre en producción.
 
 ## Antes de empezar
 
@@ -36,12 +38,7 @@ Construyendo columnas nuevas que hagan explícito cada patrón. Para la tarifa f
 
 ## Ejercicio 1: features de fecha y hora
 
-Archivo: [`starter/ejercicio1_features_tiempo.py`](./starter/ejercicio1_features_tiempo.py), sobre [`starter/viajes_taxi.csv`](./starter/viajes_taxi.csv), el mismo dataset de la sesión pasada. El script ya quita los errores confirmados, convierte `fecha_hora_inicio` y compara la tarifa por kilómetro según la hora pico; faltan 4 `TODO`: hora, día de la semana, fin de semana, hora pico y la hora como ciclo. Córrelo una vez antes de tocar nada:
-
-```
-cd laboratorios/semana-09-sesion-01/starter
-python3 ejercicio1_features_tiempo.py
-```
+Notebook: [`starter/ejercicio1_features_tiempo.ipynb`](./starter/ejercicio1_features_tiempo.ipynb), sobre [`starter/viajes_taxi.csv`](./starter/viajes_taxi.csv), el mismo dataset de la sesión pasada. Ya quita los errores confirmados, convierte `fecha_hora_inicio` y compara la tarifa por kilómetro según la hora pico; faltan 4 `TODO`: hora, día de la semana, fin de semana, hora pico y la hora como ciclo. Córrelo completo una vez antes de tocar nada (**Run All**).
 
 **Respuesta 1 (TODO 4), antes de ver la solución:** si dejas la hora como un número del 0 al 23, ¿qué tan lejos queda la hora 23 de la hora 0 para un modelo que mide distancias entre números? ¿Y en el reloj?
 
@@ -50,6 +47,18 @@ Como números, 23 y 0 quedan a 23 unidades de distancia, la mayor distancia posi
 **Respuesta 2 (TODO 3):** sin el TODO 3, el Paso 4 muestra un solo grupo. Con la hora pico construida, ¿esperas que la tarifa por kilómetro sea más alta o más baja en hora pico? ¿Por qué, si la tarifa depende de la distancia y de la duración?
 
 Más alta. La tarifa no depende solo de la distancia sino también del tiempo: en hora pico hay tráfico, el taxi tarda más minutos por cada kilómetro y el taxímetro cobra ese tiempo extra. La salida lo confirma: la mediana de la tarifa por kilómetro sube de 3.22 fuera de hora pico a 3.52 en hora pico (alrededor de 9% más).
+
+**Respuesta 3:** la duración del viaje no existe al pedir el taxi, pero la hora sí. ¿Qué parte de lo que la duración le diría al modelo puede traer `es_hora_pico`?
+
+La duración le diría al modelo cuánto tráfico hubo en el viaje, es decir, cuántos minutos se pagaron por cada kilómetro. `es_hora_pico` no sabe la duración real, pero sí sabe si el viaje empieza en un horario donde normalmente hay congestión, y eso existe al momento de pedir el taxi. Trae la parte "esperada" del efecto del tráfico sin filtrar información del futuro.
+
+**Respuesta 2 (TODO 3):** sin el TODO 3, el Paso 4 muestra un solo grupo. Con la hora pico construida, ¿esperas que la tarifa por kilómetro sea más alta o más baja en hora pico? ¿Por qué, si la tarifa depende de la distancia y de la duración?
+
+Más alta. La tarifa no depende solo de la distancia sino también del tiempo: en hora pico hay tráfico, el taxi tarda más minutos por cada kilómetro y el taxímetro cobra ese tiempo extra. La salida lo confirma: la mediana de la tarifa por kilómetro sube de 3.22 fuera de hora pico a 3.52 en hora pico (alrededor de 9% más).
+
+**Respuesta 3:** la duración del viaje no existe al pedir el taxi, pero la hora sí. ¿Qué parte de lo que la duración le diría al modelo puede traer `es_hora_pico`?
+
+La duración le diría al modelo cuánto tráfico hubo en el viaje, es decir, cuántos minutos se pagaron por cada kilómetro. `es_hora_pico` no sabe la duración real, pero sí sabe si el viaje empieza en un horario donde normalmente hay congestión, y eso existe al momento de pedir el taxi. Trae la parte "esperada" del efecto del tráfico sin filtrar información del futuro.
 
 **Respuesta 3:** la duración del viaje no existe al pedir el taxi, pero la hora sí. ¿Qué parte de lo que la duración le diría al modelo puede traer `es_hora_pico`?
 
@@ -77,11 +86,7 @@ No. La discusión confirmó el criterio: primero se descartan las columnas que n
 
 ## Ejercicio 2: zona, codificación y disponibilidad
 
-Solo o en pareja. Archivo: [`starter/ejercicio2_features_zona.py`](./starter/ejercicio2_features_zona.py), sobre el mismo `viajes_taxi.csv`. Completa los 4 `TODO`. Al final, el script imprime una comprobación por TODO: complétalos hasta que todas digan `OK`.
-
-```
-python3 ejercicio2_features_zona.py
-```
+Solo o en pareja. Notebook: [`starter/ejercicio2_features_zona.ipynb`](./starter/ejercicio2_features_zona.ipynb), sobre el mismo `viajes_taxi.csv`. Completa los 4 `TODO`. La última celda imprime una comprobación por TODO: complétalos hasta que todas digan `OK`.
 
 **Respuesta 1:** ¿cuántos viajes tienen `es_tarifa_fija` en 1, y qué tarifa mínima y máxima tienen? ¿Qué te dice eso sobre lo que un modelo lineal puede aprender con esta columna?
 
@@ -95,51 +100,37 @@ One-hot crea 8 columnas (una por cada zona de origen: Brooklyn, Harlem, JFK Airp
 
 `duracion_min`, `metodo_pago`, `propina` y la propia `tarifa`, que es el objetivo. Las cuatro se conocen recién cuando el viaje termina (la distancia sí existe, porque la app la estima con la ruta). Si las usara para entrenar habría fuga de información: el modelo aprendería, por ejemplo, que la duración explica casi toda la tarifa y se vería excelente en la evaluación, pero en producción, al momento de pedir el taxi, esas columnas no existen y el modelo no podría usarse o sus predicciones se derrumbarían.
 
+**Respuesta 2:** ¿cuántas columnas crea one-hot para la zona de origen, y cuántas la codificación ordinal? Si el modelo es una regresión lineal, ¿cuál de las dos usarías, y por qué la otra le da información falsa?
+
+One-hot crea 8 columnas (una por cada zona de origen: Brooklyn, Harlem, JFK Airport, Lower Manhattan, Midtown, Queens, Upper East Side y Upper West Side); la codificación ordinal crea 1 sola columna, `origen_ordinal`, con valores del 0 al 7. Para una regresión lineal usaría one-hot. La ordinal le da información falsa porque el modelo multiplica el número por un coeficiente: asume que las zonas tienen un orden y que están igual de separadas (que Upper West Side, 7, "vale" siete veces más que Harlem, 1, o que Midtown, 4, está a medio camino entre Brooklyn y Upper West Side), cuando el número solo sale del orden alfabético.
+
+**Respuesta 3:** ¿qué columnas del dataset no existen al pedir el taxi? ¿Qué pasaría con el modelo si las usaras para entrenar?
+
+`duracion_min`, `metodo_pago`, `propina` y la propia `tarifa`, que es el objetivo. Las cuatro se conocen recién cuando el viaje termina (la distancia sí existe, porque la app la estima con la ruta). Si las usara para entrenar habría fuga de información: el modelo aprendería, por ejemplo, que la duración explica casi toda la tarifa y se vería excelente en la evaluación, pero en producción, al momento de pedir el taxi, esas columnas no existen y el modelo no podría usarse o sus predicciones se derrumbarían.
+
+**Respuesta 3:** ¿qué columnas del dataset no existen al pedir el taxi? ¿Qué pasaría con el modelo si las usaras para entrenar?
+
+`duracion_min`, `metodo_pago`, `propina` y la propia `tarifa`, que es el objetivo. Las cuatro se conocen recién cuando el viaje termina (la distancia sí existe, porque la app la estima con la ruta). Si las usara para entrenar habría fuga de información: el modelo aprendería, por ejemplo, que la duración explica casi toda la tarifa y se vería excelente en la evaluación, pero en producción, al momento de pedir el taxi, esas columnas no existen y el modelo no podría usarse o sus predicciones se derrumbarían.
+
 ## Ejercicio 3: dos features para tu proyecto
 
-Usa el mismo archivo de la exploración de la Semana 8 y la plantilla [`plantilla-features/features_proyecto.py`](./plantilla-features/features_proyecto.py).
+Usa el mismo archivo de tu exploración de la Semana 8 y copia la plantilla [`plantilla-features/features_proyecto.ipynb`](./plantilla-features/features_proyecto.ipynb) a la carpeta de tu proyecto. Todo lo que pide este ejercicio queda en el notebook: el código de cada feature, la evidencia y la justificación en las celdas de texto.
 
 ### Paso 1: el momento de la predicción (5 minutos)
 
-Escribe qué predice tu modelo y en qué momento: qué información existe en ese instante y cuál todavía no.
-
-Proyecto: flujo de estaciones de Ecobici (CDMX), agosto de 2026, 100 estaciones en franjas de 15 minutos (297,600 filas). El modelo predice `y_salidas_prox_30m`: cuántas bicicletas van a salir de una estación en los próximos 30 minutos, y la predicción se hace al cierre de cada franja de 15 minutos, para anticipar si una estación se va a vaciar.
-
-- **Existe en ese instante:** la estación y sus atributos fijos (código, ubicación, `capacidad`), la fecha, la hora, la franja, el día de la semana, si es fin de semana u hora pico, y todo el flujo ya observado: `salidas` y `llegadas` de la franja que acaba de cerrar, `salidas_lag_15m`, `salidas_ultima_hora` y `salidas_mismo_momento_ayer`.
-- **Todavía no existe:** las salidas y llegadas de los próximos 30 minutos (el objetivo) y cualquier columna calculada con ellas.
+En la primera celda de texto, escribe qué predice tu modelo y en qué momento: qué información existe en ese instante y cuál todavía no.
 
 ### Paso 2: construye las 2 features (15 minutos)
 
-Completa la plantilla con 2 columnas nuevas, derivadas de las existentes. Al menos una tiene que salir de uno de tus hallazgos de la exploración.
-
-Las dos están en [`plantilla-features/features_proyecto.py`](./plantilla-features/features_proyecto.py):
-
-```python
-# Feature 1: periodo de demanda segun la hora.
-hora = datos["hora"]
-datos["periodo_demanda"] = np.select(
-    [hora < 5, (hora >= 7) & (hora <= 9), (hora >= 14) & (hora <= 18)],
-    ["madrugada", "pico_manana", "pico_tarde"],
-    default="resto",
-)
-
-# Feature 2: salidas de la ultima hora relativas a la capacidad de la estacion.
-datos["salidas_hora_por_capacidad"] = (
-    datos["salidas_ultima_hora"] / datos["capacidad"].clip(lower=1)
-)
-```
+Crea 2 columnas nuevas, derivadas de las existentes, cada una en su celda y con su evidencia (una correlación, una diferencia de promedios). Al menos una tiene que salir de uno de tus hallazgos de la exploración. Si pruebas una idea que no aporta, deja la celda y escribe por qué la descartas: también es evidencia.
 
 ### Paso 3: justifica cada feature (5 minutos)
 
-Para cada una: de qué hallazgo o conocimiento del dominio sale, qué evidencia muestra que aporta (una correlación, una diferencia de promedios), y por qué existe en el momento de predecir. Si alguna es categórica, di qué codificación usarías según el modelo que planeas entrenar.
+Debajo de cada feature: de qué hallazgo o conocimiento del dominio sale, qué evidencia muestra que aporta, y por qué existe en el momento de predecir. Si alguna es categórica, di qué codificación usarías según el modelo que planeas entrenar. Antes de hacer commit, reinicia el kernel y corre todo.
 
-**Feature 1:**
+**Ruta de tu notebook de features en tu fork:**
 
-`periodo_demanda` sale directamente del hallazgo de la exploración de la Semana 8: de 1 a 4 de la mañana prácticamente no hay salidas, y la demanda sube en la mañana (7 a 9) y en la tarde (14 a 18). La evidencia es la diferencia de promedios del objetivo por periodo: madrugada 0.02 salidas en los próximos 30 min, resto 1.39, pico de la mañana 2.27 y pico de la tarde 2.62 (el promedio general es 1.47). Existe al predecir porque solo usa la hora actual. Es categórica sin un orden real: para un modelo lineal (Ridge) usaría one-hot; para un ensamblaje de árboles también funciona con one-hot, y como son solo 4 categorías no agrega muchas columnas.
-
-**Feature 2:**
-
-`salidas_hora_por_capacidad` sale del conocimiento del dominio: 5 salidas en una hora no significan lo mismo en una estación de 11 anclajes que en una de 40; dividir entre la capacidad mide qué tan "presionada" está la estación y hace comparables estaciones de distinto tamaño. La evidencia: su correlación con el objetivo es 0.541. Es algo menor que la de `salidas_ultima_hora` sola (0.600), porque el objetivo está en salidas absolutas y no en proporción; su valor es complementar a la variable cruda, no reemplazarla, y sirve sobre todo para el objetivo de alertas de estaciones vacías (que dependen de la capacidad). Existe al predecir porque usa solo la última hora ya observada y un atributo fijo de la estación; la capacidad mínima es 11, así que nunca divide entre 0. Es numérica, no necesita codificación (solo escalado para el modelo lineal).
+[`laboratorios/semana-09-sesion-01/plantilla-features/features_proyecto.ipynb`](./plantilla-features/features_proyecto.ipynb)
 
 ## Antes de la próxima sesión
 
