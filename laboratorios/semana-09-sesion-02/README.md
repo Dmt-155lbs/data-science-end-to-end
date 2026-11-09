@@ -129,7 +129,7 @@ El Bronx no apareció en entrenamiento, así que el `OneHotEncoder` con `handle_
 
 ## Ejercicio 3: el pipeline de tu proyecto, como script
 
-Copia la plantilla [`plantilla-pipeline/pipeline_proyecto.py`](./plantilla-pipeline/pipeline_proyecto.py) a la carpeta de tu proyecto, al lado de tu notebook de features. Desde la próxima sesión, tus notebooks de modelos importan este archivo en vez de copiar su código:
+Copia la plantilla [`plantilla-pipeline/pipeline_proyecto.py`](./plantilla-pipeline/pipeline_proyecto.py) a `psets/proyecto/modelado/`, al lado de tu notebook de features. Desde la próxima sesión, tus notebooks de modelos importan este archivo en vez de copiar su código:
 
 ```python
 from pipeline_proyecto import cargar_y_dividir, construir_preparacion
@@ -161,7 +161,7 @@ En el script, el corte vive en `cargar_y_dividir`: entrenamiento hasta `ULTIMO_D
 
 ### Paso 4: corre el script (10 minutos)
 
-Desde una terminal, en la carpeta de tu proyecto:
+Desde una terminal, en `psets/proyecto/modelado/`:
 
 ```
 python3 pipeline_proyecto.py
