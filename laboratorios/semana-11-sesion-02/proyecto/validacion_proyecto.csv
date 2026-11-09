@@ -1,0 +1,5 @@
+validacion,mae_promedio,desviacion,pliegues
+"temporal, gradient boosting",1.0,0.0369,"[0.952, 1.0275, 1.054, 0.9715, 0.9951]"
+"temporal, red neuronal",0.993,0.0322,"[0.9621, 1.0219, 1.0406, 0.964, 0.9764]"
+"al azar, gradient boosting",0.9904,0.0022,"[0.9898, 0.988, 0.9886, 0.994, 0.9917]"
+"al azar, red neuronal",0.979,0.0053,"[0.9795, 0.9693, 0.9792, 0.9848, 0.9824]"

@@ -1,0 +1,4 @@
+modelo,mae,costo_asimetrico,subestimadas,cortas_en_demanda_alta
+persistencia,1.1767,2.3534,0.2737,0.5193
+gradient boosting,1.0,1.9993,0.3899,0.3913
+red neuronal,0.993,1.9889,0.3865,0.3919
