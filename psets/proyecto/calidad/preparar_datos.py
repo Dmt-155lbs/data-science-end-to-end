@@ -15,11 +15,10 @@ SEMILLA = 42
 
 # rutas relativas a este script
 AQUI = os.path.dirname(os.path.abspath(__file__))
-RAIZ = os.path.abspath(os.path.join(AQUI, "..", "..", ".."))  # data-science-end-to-end
-DATOS = os.path.abspath(os.path.join(RAIZ, "..", "..", "datos_ecobici"))  # carpeta fuera del repo
-VIAJES = os.path.join(DATOS, "raw", "viajes", "public_data_web_2026-08_2.csv")
-GBFS = os.path.join(DATOS, "raw", "gbfs", "station_information.json")
-SALIDA = os.path.join(AQUI, "..", "data", "flujo_estaciones_2026_08.csv")
+DATOS = os.path.abspath(os.path.join(AQUI, "..", "data"))  # psets/proyecto/data
+VIAJES = os.path.join(DATOS, "raw", "public_data_web_2026-08_2.csv")
+GBFS = os.path.join(DATOS, "raw", "station_information.json")
+SALIDA = os.path.join(DATOS, "processed", "flujo_estaciones_2026_08.csv")
 os.makedirs(os.path.dirname(SALIDA), exist_ok=True)
 
 

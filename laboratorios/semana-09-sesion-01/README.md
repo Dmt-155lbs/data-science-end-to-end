@@ -130,7 +130,7 @@ Debajo de cada feature: de qué hallazgo o conocimiento del dominio sale, qué e
 
 **Ruta de tu notebook de features en tu fork:**
 
-[`laboratorios/semana-09-sesion-01/plantilla-features/features_proyecto.ipynb`](./plantilla-features/features_proyecto.ipynb)
+[`psets/proyecto/modelado/features_proyecto.ipynb`](../../psets/proyecto/modelado/features_proyecto.ipynb)
 
 ## Antes de la próxima sesión
 

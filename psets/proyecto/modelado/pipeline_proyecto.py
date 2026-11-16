@@ -20,10 +20,11 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-# El mismo archivo del notebook de features: el flujo de estaciones de
-# Ecobici de la exploracion de la Semana 8. La ruta sale de la ubicacion de
-# este archivo, asi funciona igual desde los notebooks de otras carpetas.
-RUTA_DATOS = Path(__file__).resolve().parent / "../../semana-08-sesion-02/data/flujo_estaciones_2026_08.csv"
+# El archivo limpio que deja calidad/preparar_datos.py: el flujo de
+# estaciones de Ecobici, el mismo de la exploracion y del notebook de
+# features. La ruta sale de la ubicacion de este archivo, asi funciona igual
+# desde una terminal o desde los notebooks.
+RUTA_DATOS = Path(__file__).resolve().parent / "../data/processed/flujo_estaciones_2026_08.csv"
 
 OBJETIVO = "y_salidas_prox_30m"
 

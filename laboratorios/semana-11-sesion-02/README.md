@@ -121,7 +121,7 @@ La temporal. El modelo predice las salidas de los próximos 30 minutos a partir 
 
 **¿Cambió la conclusión entre el esquema al azar y el tuyo? Muestra los números.**
 
-El orden no cambió, pero sí cuánto confiar en él. Tabla en [`validacion_proyecto.csv`](./proyecto/validacion_proyecto.csv):
+El orden no cambió, pero sí cuánto confiar en él. Tabla en [`validacion_proyecto.csv`](../../psets/proyecto/modelado/validacion_proyecto.csv):
 
 | Esquema | Gradient boosting | Red neuronal |
 |---|---|---|
@@ -132,11 +132,11 @@ Al azar, el error es menor y la desviación es entre 6 y 17 veces más chica: pa
 
 **¿La diferencia entre tu modelo final y el segundo es mayor que la variación entre pliegues? ¿Sigues eligiendo el mismo?**
 
-No. En la validación temporal la red neuronal le gana al gradient boosting por 0.007 (0.9930 contra 1.0000), y la desviación entre pliegues es de 0.03 a 0.04, cinco veces más. En la división de la sesión pasada también fue 0.007. La diferencia está dentro del ruido de la partición, así que no hay evidencia de que la red sea mejor. Sigo eligiendo el gradient boosting: con rendimiento equivalente, entrena en 18.7 s contra 88.7 s y se puede explicar con sus importancias.
+No. En la validación temporal la red neuronal le gana al gradient boosting por 0.007 (0.9930 contra 1.0000), y la desviación entre pliegues es de 0.03 a 0.04, cinco veces más. En la división de la sesión pasada también fue 0.007. La diferencia está dentro del ruido de la partición, así que no hay evidencia de que la red sea mejor. Sigo eligiendo el gradient boosting: con rendimiento equivalente, entrena en 20.0 s contra 71.0 s y se puede explicar con sus importancias.
 
 **¿Qué métrica del negocio elegiste, y qué dice que no decía la anterior?**
 
-**El error caro es subestimar.** Si el modelo dice que saldrán pocas bicis y salen muchas, la estación se vacía sin que llegue el camión de rebalanceo, y cada bici que faltó es un viaje perdido. Sobreestimar cuesta un viaje del camión que no hacía falta, repartido entre las varias bicis que mueve. Supuesto aproximado: **una bici subestimada cuesta 3 veces una sobreestimada**. La métrica es el **costo asimétrico**: 3 por bici que faltó y 1 por bici de más, promediado por franja. Además mido qué proporción de las franjas de demanda alta (3 salidas o más) se quedó corta por 2 bicis o más. Sobre los pliegues temporales ([`metricas_negocio_proyecto.csv`](./proyecto/metricas_negocio_proyecto.csv)):
+**El error caro es subestimar.** Si el modelo dice que saldrán pocas bicis y salen muchas, la estación se vacía sin que llegue el camión de rebalanceo, y cada bici que faltó es un viaje perdido. Sobreestimar cuesta un viaje del camión que no hacía falta, repartido entre las varias bicis que mueve. Supuesto aproximado: **una bici subestimada cuesta 3 veces una sobreestimada**. La métrica es el **costo asimétrico**: 3 por bici que faltó y 1 por bici de más, promediado por franja. Además mido qué proporción de las franjas de demanda alta (3 salidas o más) se quedó corta por 2 bicis o más. Sobre los pliegues temporales ([`metricas_negocio_proyecto.csv`](../../psets/proyecto/modelado/metricas_negocio_proyecto.csv)):
 
 | Modelo | MAE | Costo asimétrico | Franjas subestimadas | Cortas en demanda alta |
 |---|---|---|---|---|

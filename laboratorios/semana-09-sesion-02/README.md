@@ -169,7 +169,7 @@ python3 pipeline_proyecto.py
 
 Si corre de principio a fin en una terminal nueva, sin el notebook abierto, otro código ya lo puede importar. Anota la forma de los conjuntos de entrenamiento y prueba ya preparados, y la lista de columnas que produce.
 
-Las 2 features están en `agregar_features` y el script lee el mismo CSV de la exploración de la Semana 8. Desde [`plantilla-pipeline/`](./plantilla-pipeline/pipeline_proyecto.py):
+Las 2 features están en `agregar_features` y el script lee el mismo CSV de la exploración de la Semana 8. Desde [`psets/proyecto/modelado/`](../../psets/proyecto/modelado/pipeline_proyecto.py):
 
 ```
 Filas entrenamiento: 230400 Filas prueba: 67100

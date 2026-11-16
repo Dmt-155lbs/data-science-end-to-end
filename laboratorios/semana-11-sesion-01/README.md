@@ -125,16 +125,16 @@ La tabla de corridas de tu experimento, exportada con `mlflow.search_runs(...).t
 
 **¿Qué modelo elegiste como final? Escribe su `run_id` y los números del registro que sostienen la decisión.**
 
-El gradient boosting, `run_id` **`b3cdcd9d46894965b2f2b9fbc5fde396`**, marcado con `candidato` = `final` en el experimento `ecobici-rebalanceo` ([`experimentos_proyecto.ipynb`](./proyecto/experimentos_proyecto.ipynb), tabla en [`corridas_proyecto.csv`](./proyecto/corridas_proyecto.csv)). Las cuatro corridas usan la misma huella de datos (`968012844003`) y la misma división (entrenamiento hasta el 2026-08-24):
+El gradient boosting, `run_id` **`7749f7c3a8a74957baf3eb06d655ba7b`**, marcado con `candidato` = `final` en el experimento `ecobici-rebalanceo` ([`experimentos_proyecto.ipynb`](../../psets/proyecto/modelado/experimentos_proyecto.ipynb), tabla en [`corridas_proyecto.csv`](../../psets/proyecto/modelado/corridas_proyecto.csv)). Las cuatro corridas usan la misma huella de datos (`968012844003`) y la misma división (entrenamiento hasta el 2026-08-24):
 
 | Corrida | MAE entrenamiento | MAE prueba | Segundos |
 |---|---|---|---|
-| red neuronal | 0.9649 | 1.0209 | 88.7 |
-| **gradient boosting** | 0.9739 | **1.0278** | 18.7 |
+| red neuronal | 0.9649 | 1.0209 | 71.0 |
+| **gradient boosting** | 0.9739 | **1.0278** | 20.0 |
 | ridge | 1.0117 | 1.0632 | 0.3 |
 | persistencia 30 min (línea base) | 1.1527 | 1.2278 | 0 |
 
-La red neuronal le gana por 0.0069 salidas, menos de 1%. A cambio tarda casi 5 veces más en entrenar y no deja leer qué columnas mandan, así que con un rendimiento prácticamente igual elijo el modelo más simple y explicable. El gradient boosting mejora 16.3% a la línea base. Cargado desde `runs:/b3cdcd9d46894965b2f2b9fbc5fde396/modelo`, reproduce exactamente su MAE registrado (1.027782).
+La red neuronal le gana por 0.0069 salidas, menos de 1%. A cambio tarda 3.5 veces más en entrenar y no deja leer qué columnas mandan, así que con un rendimiento prácticamente igual elijo el modelo más simple y explicable. El gradient boosting mejora 16.3% a la línea base. Cargado desde `runs:/7749f7c3a8a74957baf3eb06d655ba7b/modelo`, reproduce exactamente su MAE registrado (1.027782).
 
 **Si otra persona clona tu repositorio, ¿qué necesita para obtener exactamente el mismo número? ¿Qué de eso quedó registrado en MLflow y qué no?**
 
