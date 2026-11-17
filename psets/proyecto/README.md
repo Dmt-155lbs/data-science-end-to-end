@@ -46,7 +46,7 @@ El notebook 5 necesita el servidor de MLflow levantado: el devcontainer lo arran
 
 El servicio (`servicio/api.py`, FastAPI) recibe una franja de 15 minutos de una estación como la conoce quien llama (el lote de cada 15 minutos, ver [`docs/despliegue.md`](docs/despliegue.md)) y devuelve las salidas estimadas para los próximos 30 minutos. Calcula él mismo `dia_semana`, `es_fin_de_semana`, `periodo_demanda` y `salidas_hora_por_capacidad`, con las funciones de `modelado/pipeline_proyecto.py`.
 
-1. **Exportar el modelo** desde MLflow (con el servidor levantado), desde `psets/proyecto/`. Carga la corrida `7749f7c3a8a74957baf3eb06d655ba7b` (fijada en `servicio/version.py`) y la guarda en `servicio/modelo.joblib`, que no se sube a git:
+1. **Exportar el modelo** desde el registro de MLflow (con el servidor levantado), desde `psets/proyecto/`. Busca la versión de `ecobici-rebalanceo` con el alias `produccion` (hoy la 1: el mismo gradient boosting de la corrida `7749f7c3…`, reentrenado con la misma semilla y los mismos datos, MAE 1.0278) y la guarda en `servicio/modelo.joblib` y su número en `servicio/modelo_version.txt`, que no se suben a git. Cómo se registran versiones y se mueve el alias: [`docs/despliegue.md`](docs/despliegue.md), sección "Versionado y registro".
 
    ```
    python servicio/exportar_modelo.py
@@ -68,7 +68,7 @@ El servicio (`servicio/api.py`, FastAPI) recibe una franja de 15 minutos de una 
    ```
 
    ```
-   {"estacion_codigo":"495","salidas_prox_30m":10.5,"run_id":"7749f7c3a8a74957baf3eb06d655ba7b"}
+   {"estacion_codigo":"495","salidas_prox_30m":10.5,"version_modelo":"1"}
    ```
 
-   `/salud` responde `{"estado":"ok","modelo_cargado":true,"run_id":"7749f7c3a8a74957baf3eb06d655ba7b"}`. Una hora fuera de 0 a 23 o una capacidad de 0 reciben 422 antes de llegar al modelo. Las pruebas (`servicio/test_api.py`) corren con `pytest psets/proyecto` en cada push.
+   `/salud` responde `{"estado":"ok","modelo_cargado":true,"version_modelo":"1"}`. Una hora fuera de 0 a 23 o una capacidad de 0 reciben 422 antes de llegar al modelo. Las pruebas (`servicio/test_api.py`) corren con `pytest psets/proyecto` en cada push.

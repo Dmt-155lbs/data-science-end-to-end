@@ -1,0 +1,3 @@
+# Los exporta exportar_modelo.py desde el registro de MLflow; no se suben.
+modelo.joblib
+modelo_version.txt

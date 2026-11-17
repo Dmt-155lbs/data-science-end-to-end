@@ -18,12 +18,15 @@ from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
 from modelado.pipeline_proyecto import CATEGORICAS, NUMERICAS, YA_LISTAS, agregar_calendario, agregar_features
-from servicio.version import RUN_ID
 
-RUTA_MODELO = Path(os.environ.get("RUTA_MODELO", Path(__file__).resolve().parent / "modelo.joblib"))
+CARPETA = Path(__file__).resolve().parent
+RUTA_MODELO = Path(os.environ.get("RUTA_MODELO", CARPETA / "modelo.joblib"))
+RUTA_VERSION = CARPETA / "modelo_version.txt"
 
-# El modelo se carga una sola vez, al arrancar el servicio.
+# El modelo y su version del registro (ecobici-rebalanceo@produccion, los dos
+# exportados por exportar_modelo.py) se cargan una sola vez, al arrancar.
 modelo = joblib.load(RUTA_MODELO) if RUTA_MODELO.exists() else None
+version_servida = RUTA_VERSION.read_text(encoding="utf-8").strip() if RUTA_VERSION.exists() else None
 
 app = FastAPI(title="Salidas de Ecobici en los proximos 30 minutos")
 
@@ -44,7 +47,7 @@ class Franja(BaseModel):
 
 @app.get("/salud")
 def salud():
-    return {"estado": "ok", "modelo_cargado": modelo is not None, "run_id": RUN_ID}
+    return {"estado": "ok", "modelo_cargado": modelo is not None, "version_modelo": version_servida}
 
 
 @app.post("/predecir")
@@ -57,5 +60,5 @@ def predecir(franja: Franja):
     return {
         "estacion_codigo": franja.estacion_codigo,
         "salidas_prox_30m": round(max(salidas, 0.0), 2),
-        "run_id": RUN_ID,
+        "version_modelo": version_servida,
     }
