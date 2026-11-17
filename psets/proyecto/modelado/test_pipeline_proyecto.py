@@ -53,7 +53,7 @@ def test_features_calculadas_a_mano():
     datos = agregar_features(franjas_de_prueba())
     assert list(datos["periodo_demanda"]) == ["madrugada", "pico_manana", "pico_tarde", "madrugada", "pico_manana", "resto"]
     # 6 salidas en la ultima hora en una estacion de 20 anclajes: 6 / 20 = 0.3.
-    assert datos.loc[1, "salidas_hora_por_capacidad"] == pytest.approx(0.4)
+    assert datos.loc[1, "salidas_hora_por_capacidad"] == pytest.approx(0.3)
     # Sin historia (rezago faltante), la feature tambien queda faltante: la
     # imputa la preparacion, no se inventa aqui.
     assert np.isnan(datos.loc[0, "salidas_hora_por_capacidad"])
