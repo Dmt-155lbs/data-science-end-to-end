@@ -136,15 +136,15 @@ El archivo [`.github/workflows/pruebas.yml`](../../.github/workflows/pruebas.yml
 
 **Pega el enlace a la ejecución de GitHub Actions donde pasan tus pruebas:**
 
-_(tu respuesta)_
+[https://github.com/Dmt-155lbs/data-science-end-to-end/actions/runs/43988950285](https://github.com/Dmt-155lbs/data-science-end-to-end/actions/runs/43988950285): las cuatro pruebas de [`test_pipeline_proyecto.py`](../../psets/proyecto/modelado/test_pipeline_proyecto.py) pasan (`4 passed`) en una máquina limpia de GitHub. Prueban que el objetivo no entra al modelo, que las dos features dan lo que se calcula a mano, que la división por fecha no deja franjas del futuro en entrenamiento y que la preparación acepta un periodo que no vio y rezagos faltantes.
 
 **¿Qué patrón elegiste para tu proyecto, y qué número de latencia lo decide?**
 
-_(tu respuesta)_
+**Por lotes, cada 15 minutos**, al cierre de cada franja ([`docs/despliegue.md`](../../psets/proyecto/docs/despliegue.md)). El número que lo decide: la predicción tiene que estar lista **entre 1 y 2 minutos** después del cierre de la franja, para un horizonte de 30 minutos. El despachador de rebalanceo la revisa cada 15 minutos y nadie espera una respuesta en milisegundos. Las 100 estaciones se conocen de antemano y se predicen juntas en una fracción de segundo, así que una API en línea no gana nada. Tampoco sirve un lote nocturno: las features son las salidas de la franja que acaba de cerrar, que no existen la noche anterior.
 
 **Rompe a propósito una de tus pruebas (cambia un valor esperado), haz push y mira qué pasa en GitHub. Después arréglala. ¿Qué te dijo GitHub, y dónde lo viste?**
 
-_(tu respuesta)_
+Cambié el valor esperado de `salidas_hora_por_capacidad` de 0.3 a 0.4 en `test_features_calculadas_a_mano` y hice push. GitHub marcó el commit con una **X roja** junto al mensaje, en la lista de commits y en la pestaña **Actions** ([ejecución fallida](https://github.com/Dmt-155lbs/data-science-end-to-end/actions/runs/43989150022)). En el log del paso "Correr las pruebas de psets/proyecto" dijo `1 failed, 3 passed`, con la prueba exacta y la línea: `assert 0.3 == 0.4 ± 4.0e-07`, `test_pipeline_proyecto.py:56: AssertionError`. Es decir, el código calcula 0.3 (6 salidas entre 20 anclajes) y la prueba esperaba 0.4. Volví a poner 0.3, hice push y la marca volvió a verde ([ejecución corregida](https://github.com/Dmt-155lbs/data-science-end-to-end/actions/runs/43989366392)).
 
 ## Antes de la próxima sesión
 
