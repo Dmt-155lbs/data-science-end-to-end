@@ -63,6 +63,18 @@ def agregar_features(datos):
     return datos
 
 
+def agregar_calendario(datos):
+    """dia_semana (1 es lunes, 7 es domingo) y es_fin_de_semana a partir de
+    la fecha, con la misma definicion que trae el archivo de entrenamiento.
+    El entrenamiento ya las recibe calculadas; el servicio las calcula con
+    esta funcion a partir de la fecha que le mandan."""
+    datos = datos.copy()
+    fecha = pd.to_datetime(datos["fecha"])
+    datos["dia_semana"] = fecha.dt.isocalendar().day.astype(int)
+    datos["es_fin_de_semana"] = datos["dia_semana"] >= 6
+    return datos
+
+
 def cargar_y_dividir(ruta=RUTA_DATOS):
     # estacion_codigo se lee como texto por los codigos dobles como "271-272".
     datos = agregar_features(pd.read_csv(ruta, dtype={"estacion_codigo": str}))

@@ -57,7 +57,7 @@ def predecir(viaje: Viaje):
     # estima la tarifa con el modelo.
 
     dto = pd.DataFrame([viaje.model_dump()])
-    datos_enriquecidos = agregar_features(dto[CATEGORICAS + YA_LISTAS + NUMERICAS])
-    tarifa = modelo.predict(datos_enriquecidos[CATEGORICAS + YA_LISTAS + NUMERICAS])
+    datos_enriquecidos = agregar_features(dto)
+    tarifa = modelo.predict(datos_enriquecidos[NUMERICAS + YA_LISTAS + CATEGORICAS])[0]
 
     return {"tarifa_estimada": round(float(tarifa), 2)}

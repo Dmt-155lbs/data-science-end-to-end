@@ -44,4 +44,31 @@ El notebook 5 necesita el servidor de MLflow levantado: el devcontainer lo arran
 
 ## Cómo correr el servicio
 
-[Cómo se construye y se levanta el contenedor de `servicio/`, qué versión del modelo carga desde el registro, y un ejemplo de petición con su respuesta. Se completa con el PSet 4.]
+El servicio (`servicio/api.py`, FastAPI) recibe una franja de 15 minutos de una estación como la conoce quien llama (el lote de cada 15 minutos, ver [`docs/despliegue.md`](docs/despliegue.md)) y devuelve las salidas estimadas para los próximos 30 minutos. Calcula él mismo `dia_semana`, `es_fin_de_semana`, `periodo_demanda` y `salidas_hora_por_capacidad`, con las funciones de `modelado/pipeline_proyecto.py`.
+
+1. **Exportar el modelo** desde MLflow (con el servidor levantado), desde `psets/proyecto/`. Carga la corrida `7749f7c3a8a74957baf3eb06d655ba7b` (fijada en `servicio/version.py`) y la guarda en `servicio/modelo.joblib`, que no se sube a git:
+
+   ```
+   python servicio/exportar_modelo.py
+   ```
+
+2. **Construir y levantar el contenedor**, desde `psets/proyecto/`:
+
+   ```
+   docker build -f servicio/Dockerfile -t servicio-ecobici .
+   docker run -p 8000:8000 servicio-ecobici
+   ```
+
+   Sin contenedor: `uvicorn servicio.api:app --port 8000`. Documentación interactiva en `/docs`.
+
+3. **Ejemplo**, con la estación 495 el 26 de agosto a las 8 de la mañana (salieron 7 bicis en los 30 minutos siguientes):
+
+   ```
+   curl -X POST localhost:8000/predecir -H "Content-Type: application/json" -d '{"estacion_codigo": "495", "fecha": "2026-08-26", "hora": 8, "capacidad": 39, "salidas": 4, "llegadas": 6, "salidas_lag_15m": 10.0, "salidas_ultima_hora": 40.0, "salidas_mismo_momento_ayer": 9.0}'
+   ```
+
+   ```
+   {"estacion_codigo":"495","salidas_prox_30m":10.5,"run_id":"7749f7c3a8a74957baf3eb06d655ba7b"}
+   ```
+
+   `/salud` responde `{"estado":"ok","modelo_cargado":true,"run_id":"7749f7c3a8a74957baf3eb06d655ba7b"}`. Una hora fuera de 0 a 23 o una capacidad de 0 reciben 422 antes de llegar al modelo. Las pruebas (`servicio/test_api.py`) corren con `pytest psets/proyecto` en cada push.
