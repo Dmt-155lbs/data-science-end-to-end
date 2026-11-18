@@ -16,17 +16,17 @@ A partir de la lectura previa:
 
 **Según el artículo, ¿por qué no alcanza con vigilar la salud y el volumen de peticiones del servicio? ¿Qué hay que medir además?**
 
-_(tu respuesta)_
+Porque la calidad de un modelo se degrada con el tiempo aunque el servicio siga sano, y que el servicio responda rápido y sin errores no dice nada de si sus predicciones siguen siendo buenas. El artículo dice que no alcanza con vigilar la salud y el volumen del servicio: hay que evaluar el desempeño del modelo de forma continua. Las causas que nombra son el **data drift** (las entradas cambian de distribución), el **concept drift** (cambia la relación entre las entradas y lo que se predice, y lo aprendido deja de valer), el **training-serving skew** (producción calcula las features distinto que el entrenamiento) y los problemas del pipeline de datos (un esquema que cambia, datos faltantes o inválidos).
 
 **El artículo dice que la verdad (ground truth) a veces llega con demora, o no llega. ¿Qué propone medir mientras tanto?**
 
-_(tu respuesta)_
+Cuando se puede, compararlas con la verdad que llega después: unir los registros de predicción con los valores reales y calcular la métrica (un **backtest**), por día y por versión. Eso solo funciona si la verdad llega rápido y es confiable. Mientras llega, recomienda vigilar **proxies**: el drift de las predicciones (cambia su distribución) y el drift de los datos de entrada respecto del entrenamiento, que avisan antes aunque no prueban que el modelo esté peor; y alertar con pocos umbrales claros, para no saturar al equipo con alertas.
 
 ## Pregunta de apertura
 
 Tu servicio responde en unos milisegundos, `/salud` dice que todo está bien, y cada tarifa dice qué versión la calculó. ¿Qué le pasa a un modelo que responde rápido pero cada vez peor? ¿Cómo te enterarías?
 
-_(tu respuesta)_
+Se degrada en silencio: sigue respondiendo en milisegundos, `/salud` dice `ok` y cada tarifa trae su versión, pero se equivoca cada vez más porque el mundo cambió (otras tarifas, otro tráfico) y el modelo no. Ninguna de esas señales lo muestra, porque todas miden el servicio y no el modelo. Me enteraría guardando cada predicción y comparándola con la tarifa que de verdad se cobró, para medir el error por semana y por versión; y, mientras esa verdad llega, vigilando la distribución de los viajes que entran y de las tarifas que salen, contra la del entrenamiento.
 
 ## Ejercicio 1: la tarifa, instrumentada
 
@@ -43,37 +43,50 @@ pytest -v
 
 **Respuesta 1 (antes de los TODO):** los 1156 viajes recibieron su tarifa. ¿Qué dicen `/metricas` y `desempeno.py`? ¿Qué podrías afirmar sobre el servicio en noviembre?
 
-_(tu respuesta)_
+Nada: `/metricas` devolvía `{}` y `desempeno.py` terminaba con "No hay predicciones.jsonl: el servicio no está guardando sus predicciones". Lo único que podría afirmar sobre noviembre es que el servicio respondió a los 1156 viajes, pero no cuánto tardó, cuántas peticiones rechazó ni si las tarifas fueron buenas o malas. Que todos los viajes tengan tarifa no dice nada de la calidad de esas tarifas.
 
 **Respuesta 2 (TODO 1 y 2):** antes de correr la simulación, ¿qué latencia p95 esperas, y cuántos errores de validación? ¿Esperas que la latencia cambie entre la primera y la última semana del mes?
 
-_(tu respuesta)_
+Esperaba una latencia p95 de unos pocos milisegundos, como la de la Semana 12, y casi ningún error de validación, porque la app manda viajes bien formados (los pocos que hubiera serían viajes con un dato mal escrito). Esperaba que la latencia no cambiara entre semanas: el modelo hace el mismo cálculo para cualquier viaje, sea bueno o malo. Salió una p95 de **15.77 ms** (p50 de 10.91 ms) y **3 errores de validación** de 1159 peticiones, sin errores de servidor.
 
 **Respuesta 3 (TODO 3):** el servicio devuelve `id_prediccion` y lo guarda en el registro. ¿Para qué lo necesita el sistema de cobros? ¿Qué pasaría si solo se guardaran la fecha y la tarifa estimada?
 
-_(tu respuesta)_
+Para unir cada tarifa estimada con la tarifa cobrada del mismo viaje: el sistema de cobros guarda el `id_prediccion` junto al viaje, y así, al terminar, se sabe exactamente qué predicción le corresponde a qué cobro (es la columna que usa `desempeno.py` para unirlas). Si solo se guardara la tarifa estimada, no habría cómo emparejarla con el cobro (dos viajes pueden tener la misma tarifa, y uno puede reintentar), ni saber qué versión ni qué entrada la produjeron, así que no se podría medir el error real ni investigar un caso.
 
 **Respuesta 4 (TODO 4):** el MAE en prueba de la versión 1 fue 1.17. Antes de correr `desempeno.py`, ¿qué esperas para cada semana de noviembre?
 
-_(tu respuesta)_
+Esperaba algo parecido al 1.17 de prueba en todas las semanas, si los viajes de noviembre se parecen a los de octubre, o un aumento lento si algo cambiaba poco a poco. Las dos primeras semanas fueron así (1.18 y 1.34). Lo que no esperaba es el salto: desde la semana del 16 de noviembre el error casi se cuadruplica (4.29 y 4.30) de golpe, sin que la latencia ni los errores del servicio se movieran.
 
 **Lo que mostró el monitoreo:**
 
-_(anota la latencia p95, los errores de validación y de servidor, y el MAE de cada semana)_
+| Medida | Valor |
+|---|---|
+| Latencia p95 | 15.77 ms (p50: 10.91 ms) |
+| Errores de validación | 3 de 1159 peticiones |
+| Errores de servidor | 0 |
+
+| Semana | Viajes | MAE | Veces la referencia (1.17) |
+|---|---|---|---|
+| 2 de noviembre | 291 | 1.18 | 1.01 |
+| 9 de noviembre | 318 | 1.34 | 1.15 |
+| 16 de noviembre | 308 | 4.29 | 3.67 |
+| 23 de noviembre | 239 | 4.30 | 3.68 |
+
+`pytest -v`: 2 passed. El sistema estuvo sano todo el mes; el modelo, no.
 
 ## Durante el ConcepTest
 
 **Tu voto, antes de discutir en pareja** (A, B, C o D):
 
-_(tu voto)_
+B
 
 **Tu razonamiento:**
 
-_(tu respuesta)_
+Elegí la opción que separa las métricas de sistema de las de modelo: la latencia, la disponibilidad y los errores dicen si el servicio responde, pero no si responde bien. La calidad del modelo solo se ve al comparar sus predicciones con la verdad, y para eso cada predicción tiene que quedar registrada con un identificador que permita unirla después. El ejercicio lo mostró: un servicio con p95 de 16 ms y cero errores de servidor estaba cuadruplicando su error desde el 16 de noviembre.
 
 **Después de discutir en pareja, ¿cambiaste de voto? ¿Por qué?**
 
-_(tu respuesta)_
+No. La discusión confirmó que un `/salud` en verde y una latencia baja no son evidencia de que el modelo funcione, y que el monitoreo del modelo depende de cuándo llega la verdad.
 
 ## Ejercicio 2: el fraude, cuando la verdad tarda tres semanas
 
@@ -81,19 +94,19 @@ Solo o en pareja. Carpeta: [`starter/ejercicio2/`](./starter/ejercicio2/). El se
 
 **Respuesta 1:** el reporte da tres tipos de alerta. ¿Cuáles son de sistema y cuáles de modelo? ¿El día de la latencia alta coincide con alguna semana de recall bajo?
 
-_(tu respuesta)_
+**De sistema:** la de latencia ("el 2026-11-10 la latencia p95 fue 78.2 ms"). **De modelo:** la tasa de alertas (indirecta: las semanas del 16 y del 23 de noviembre mandaron a revisión 0.050 y 0.046 de los pagos, contra 0.076 de referencia) y el recall (la semana del 16 de noviembre detectó solo 0.276 de los fraudes, contra 0.661 de referencia). El día de la latencia alta, el 10 de noviembre, no coincide con la semana del recall bajo, que empieza el 16: esa semana el recall fue 0.736, normal. Un problema del servicio y un problema del modelo son independientes.
 
 **Respuesta 2:** la tasa de alertas se puede calcular el mismo día; el recall, tres semanas después. ¿Qué semana mostró primero el problema la tasa de alertas, y cuándo lo confirmó el recall? ¿Por qué la tasa de alertas no alcanza para decir que el modelo empeoró?
 
-_(tu respuesta)_
+La tasa de alertas mostró el problema en la misma **semana del 16 de noviembre**, que se puede calcular ese mismo día; el recall de esa semana recién se puede calcular el 13 de diciembre (su domingo, el 22, más 21 días de demora). La tasa de alertas no se puede usar sola para decidir porque no mide si el modelo detecta los fraudes: cambia también si cambia la cantidad de fraudes o el tipo de pagos (menos alertas podría ser simplemente menos fraude). Es una señal temprana para investigar, no una prueba de que el modelo empeoró; la confirmación es el recall.
 
 **Respuesta 3:** ¿por qué el reporte no muestra el recall de la semana del 23 de noviembre, si ya hay fraudes confirmados de esa semana?
 
-_(tu respuesta)_
+Porque la semana del 23 de noviembre todavía no está madura: su domingo es el 29, y un fraude puede tardar hasta 21 días en confirmarse, así que sus fraudes recién están todos confirmados el 20 de diciembre. Al 14 de diciembre ya hay contracargos de esa semana, pero faltan los que todavía no llegan; un recall calculado con ellos saldría con un denominador incompleto y no se podría comparar con las semanas maduras. Por eso el reporte solo calcula el recall de las semanas cuyo domingo, más 21 días, ya pasó.
 
 **Si terminas antes:** cambia `HOY` a `"2026-11-30"` y vuelve a correr. ¿Qué semanas tienen recall? ¿Desde qué día el reporte puede mostrar la caída del recall de la semana del 16?
 
-_(tu respuesta)_
+Con `HOY = "2026-11-30"` solo tiene recall la semana del 2 de noviembre (0.767): su domingo, el 8, más 21 días es el 29 de noviembre. La del 9 necesita llegar al 6 de diciembre y la del 16, al 13 de diciembre. Lo comprobé con la función a distintas fechas: al 12 de diciembre aparecen las semanas del 2 y del 9; **desde el 13 de diciembre** aparece la del 16, con su recall de 0.276. Es decir, la caída que la tasa de alertas insinuó el mismo 16 de noviembre recién se confirma casi un mes después.
 
 ## Ejercicio 3: el monitoreo de tu proyecto
 
@@ -115,11 +128,11 @@ Una tabla con cada métrica que vigilas: si es de sistema o de modelo, de dónde
 
 **¿Cuánto tarda en llegar la verdad en tu proyecto, y qué métrica te avisa mientras tanto?**
 
-_(tu respuesta)_
+Llega **30 minutos después** de cada predicción: la verdad son las salidas reales de esa estación en la media hora siguiente, que se conocen con los viajes que terminan. Por eso, en mi proyecto, las métricas de modelo (el MAE y el costo asimétrico por día, en [`monitoreo/desempeno.py`](../../psets/proyecto/monitoreo/desempeno.py)) se pueden calcular el mismo día, a diferencia del fraude, que tarda tres semanas. Mientras tanto, lo que avisa en el momento es la **predicción media por franja**, comparada con la del mismo día de la semana anterior: si se mueve mucho, cambió lo que entra al modelo (otra demanda, una estación cerrada, rezagos que llegan vacíos), antes de saber si el error subió. En la semana simulada (25 al 31 de agosto) el MAE fue 1.0254, sin alertas, con la predicción media (1.55) pegada a las salidas reales medias (1.59). La tabla completa de métricas y umbrales está en [`docs/monitoreo.md`](../../psets/proyecto/docs/monitoreo.md).
 
 **¿Qué falla de tu modelo no vería ninguna de tus métricas de sistema?**
 
-_(tu respuesta)_
+Cualquier cambio en la demanda que el modelo no aprendió: que llegue diciembre con lluvias y vacaciones, que se abra una ciclovía o una estación nueva cerca, un evento, o que el lote empiece a mandar los rezagos mal calculados (por ejemplo, salidas de la última hora contadas en otra ventana). En todos esos casos el servicio sigue respondiendo en unos 50 ms, sin errores de validación ni de servidor, con 100 predicciones por franja y la versión correcta en `/salud`: todas mis métricas de sistema quedan en verde mientras las predicciones empeoran. Solo lo muestran el MAE y el costo asimétrico, al unir el registro con las salidas reales, y antes, como aviso, el cambio en la predicción media.
 
 ## Antes de la próxima sesión
 
