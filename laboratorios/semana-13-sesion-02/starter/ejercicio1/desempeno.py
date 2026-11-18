@@ -21,7 +21,11 @@ cobros = pd.read_csv("cobros.csv")
 # error absoluto de cada viaje, agrega la columna "semana" con el lunes de
 # la semana del viaje (fecha_hora_inicio.dt.to_period("W").dt.start_time.dt.date),
 # y agrupa por semana: "viajes" (cuantos) y "mae" (el promedio del error).
-por_semana = pd.DataFrame(columns=["viajes", "mae"])
+unidos = pd.merge(predicciones, cobros, on="id_prediccion")
+unidos["error"] = (unidos["tarifa_cobrada"] - unidos["tarifa_estimada"]).abs()
+unidos["semana"] = pd.to_datetime(unidos["fecha_hora_inicio"]).dt.to_period("W").dt.start_time.dt.date
+por_semana = unidos.groupby("semana").agg(viajes=("error", "size"), mae=("error", "mean"))
+por_semana["mae"] = por_semana["mae"].round(4)
 
 por_semana["veces_la_referencia"] = (por_semana["mae"] / MAE_REFERENCIA).round(2)
 print(por_semana.to_string())
