@@ -16,11 +16,11 @@ A partir de la lectura previa:
 
 **Según el artículo, ¿qué pasos separan un modelo entrenado en un notebook de un modelo que otra aplicación puede usar?**
 
-_(tu respuesta)_
+El artículo sigue estos pasos: entrenar el modelo y **guardarlo en un archivo** (con `joblib.dump`, `lin_regress.sav`); escribir una **API REST con FastAPI** que define el formato de la petición con un `BaseModel` de pydantic, carga el modelo una vez al arrancar y expone una ruta `GET /` y una `POST /predict` que recibe los datos nuevos y devuelve la predicción en JSON; **levantarla con uvicorn**, indicando el host y el puerto (`0.0.0.0`, 8000), y probarla con `requests`; y, por último, **empaquetarla con Docker**: un `Dockerfile` que instala Python y las dependencias de `requirements.txt`, copia el proyecto, expone el puerto 8000 y corre uvicorn; con él se construye una imagen (`docker build . -t apiserver`) y se corre el contenedor (`docker run -p 8000:8000 apiserver`). Su idea de fondo: "un modelo en un notebook vale 0 dólares" hasta que otra aplicación lo puede usar.
 
 **¿Para qué usa el artículo un contenedor, si el servicio ya corre en la máquina de quien lo escribió?**
 
-_(tu respuesta)_
+Para que el servicio corra igual en cualquier otra máquina, no solo en la del autor. Su ejemplo: un equipo de 20 personas que quiere tener la API corriendo; instalar todo en cada computadora sería un dolor de cabeza por los distintos sistemas operativos, dependencias y versiones. El contenedor empaqueta la aplicación con todas sus dependencias, así que basta tener Docker y la imagen para correrla sin preocuparse de instalar las versiones correctas. Además es más rápido y liviano que un entorno virtual o una máquina virtual.
 
 ## Pregunta de apertura
 
