@@ -16,11 +16,11 @@ A partir de la lectura previa:
 
 **Según el artículo, ¿qué hay que saber de la audiencia antes de preparar la presentación? ¿Qué recomienda hacer con la jerga técnica?**
 
-Quién es, qué sabe y qué le importa: su nivel técnico, sus objetivos y qué decisión tiene que tomar con los resultados, para elegir qué contar, con qué detalle y en qué unidad. A un equipo técnico le sirve el método; a un directivo, el impacto en el negocio y lo que tiene que decidir. Con la jerga técnica recomienda evitarla o traducirla a lenguaje simple: explicar los términos que hagan falta, usar analogías y ejemplos, y hablar del resultado en términos del negocio (dinero, tiempo, clientes) en vez de nombrar algoritmos o métricas.
+Su **formación técnica y sus intereses**, porque cada audiencia necesita otra cosa: a los ejecutivos les importa el impacto en el negocio, el retorno de la inversión y qué pueden hacer con los resultados; a los equipos de producto o marketing, el comportamiento de los clientes y el desempeño del producto; a los equipos técnicos, la metodología, el desempeño del modelo y las dificultades técnicas. Con la jerga, recomienda **evitarla**: explicar el método "sin jerga", mantener los detalles técnicos claros pero simples, y usar metáforas o analogías cuando hagan falta. También traducir el desempeño del modelo (accuracy, precision, recall) a lo que significa para el negocio, y dejar la profundidad técnica para un apéndice aparte, para quien la pida.
 
 **¿Qué lugar le da el artículo a las limitaciones y a la incertidumbre de los resultados?**
 
-Un lugar explícito, no escondido: hay que decir con claridad los supuestos, las limitaciones de los datos y del modelo y cuánta incertidumbre tienen los resultados (por ejemplo, con rangos en vez de un solo número), y qué significan para la decisión. Ser transparente con eso genera confianza y evita que se use el resultado para algo que no puede sostener; ocultarlo hace que, cuando falle, se pierda la credibilidad de todo lo demás.
+Lo pone dentro de **ser transparente**, que según el artículo es lo que genera confianza: hay que decir de entrada los supuestos y las limitaciones del análisis, y qué tan seguro se está de las predicciones o de las conclusiones. Además, recomienda llevar preparada la respuesta a "¿qué tan seguros están?" (qué tan confiables son los resultados y el modelo), presentar escenarios (el mejor y el peor caso) para que se vea el rango de resultados posibles según lo que decidan, y dejar los supuestos y las fuentes de datos en el apéndice técnico.
 
 ## Pregunta de apertura
 
