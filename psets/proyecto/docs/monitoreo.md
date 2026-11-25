@@ -31,3 +31,48 @@ Con `python -m monitoreo.simular` mandé al servicio las 67,200 franjas del 25 a
 - **Sistema:** 67,200 peticiones, 0 errores de validación, 0 de servidor, p50 de 30 ms y p95 de 51 ms; 100 predicciones en cada franja.
 - **Modelo:** 67,100 predicciones unidas con su verdad (las 100 que faltan son la última franja del 31, que no tiene próximos 30 minutos). MAE de la semana **1.0254** y costo asimétrico **2.09**: sin alertas. El MAE es apenas menor que el 1.0278 de prueba porque el servicio recorta a 0 las predicciones negativas y redondea a 2 decimales. Por día, de 0.84 (sábado 29) a 1.12 (jueves 27).
 
+## Deriva
+
+Las métricas de modelo de arriba necesitan la verdad; la deriva de datos se puede vigilar en el momento, mirando solo lo que entra. [`servicio/deriva.py`](../servicio/deriva.py) guarda las últimas **9,600 franjas** que recibió el servicio (un día: 100 estaciones × 96 franjas) y calcula el PSI de dos features contra los días de entrenamiento (1 al 24 de agosto): `salidas_ultima_hora`, la entrada más importante del modelo, y `llegadas`. Las casillas son los cuantiles de entrenamiento sin repetir (los conteos tienen muchos ceros: quedan 7 casillas para la primera y 4 para la segunda). La referencia la escribe [`monitoreo/simular_deriva.py`](../monitoreo/simular_deriva.py) en `servicio/referencia_deriva.json`, y la ruta **`/deriva`** devuelve el PSI de la ventana actual y si hay alerta.
+
+### La simulación
+
+Con `python -m monitoreo.simular_deriva`: el PSI de cada uno de los 31 días de agosto sin cambiar nada ([`deriva_ventanas_normales.csv`](../monitoreo/deriva_ventanas_normales.csv)), y los 7 días de prueba con dos tipos de deriva ([`deriva_simulacion.csv`](../monitoreo/deriva_simulacion.csv), promedio de los 7 días):
+
+- **Deriva de datos:** la demanda de todo el día cambia (lluvia o vacaciones, a la baja; un evento o una ciclovía nueva, al alza), en las entradas y en el objetivo por igual. Cambia lo que llega, no la relación entre lo reciente y lo que viene.
+- **Deriva conceptual:** con la misma historia reciente salen más bicicletas en los 30 minutos siguientes (una promoción, una estación vecina cerrada que manda usuarios a estas). Las entradas no cambian; cambia lo que hay que predecir.
+
+| Escenario | PSI de `salidas_ultima_hora` | PSI de `llegadas` | MAE | Costo asimétrico |
+|---|---|---|---|---|
+| Días normales (máximo de 31) | 0.0991 | 0.0549 | 1.1234 | 2.3483 |
+| Días de prueba, sin deriva | 0.0299 | 0.0160 | 1.0255 | 2.0879 |
+| Datos: demanda al 75% | 0.0415 | 0.0206 | 0.8799 | 1.6754 |
+| Datos: demanda al 50% | 0.2076 | 0.1019 | 0.7275 | 1.2609 |
+| Datos: demanda al 125% | 0.0815 | 0.0531 | 1.3118 | 2.8044 |
+| Datos: demanda al 150% | 0.1826 | 0.1434 | 1.5690 | 3.4666 |
+| Conceptual: salidas ×1.1 | 0.0299 | 0.0160 | 1.1136 | 2.4226 |
+| Conceptual: salidas ×1.25 | 0.0299 | 0.0160 | 1.2689 | 2.9709 |
+| Conceptual: salidas ×1.5 | 0.0299 | 0.0160 | 1.5699 | 3.9693 |
+
+Lo que más mueve el PSI en un día normal es el **fin de semana**: los cuatro días normales con PSI más alto son sábados y domingos (0.099 el sábado 22), con menos demanda que la mezcla de entrenamiento. Un fin de semana ya es, para el monitor, una pequeña deriva de datos a la baja, y por eso una caída de 25% de la demanda no se distingue de un sábado.
+
+### El umbral: 0.12
+
+Alerta si el PSI de alguna de las dos features pasa **0.12** con la ventana llena ([`deriva_umbrales.csv`](../monitoreo/deriva_umbrales.csv)):
+
+| Umbral | Falsas alarmas (31 días normales) | Detección, demanda al 50% | al 75% | al 125% | al 150% |
+|---|---|---|---|---|---|
+| 0.05 | 19% | 100% | 29% | 57% | 100% |
+| 0.10 | 0% | 86% | 29% | 57% | 86% |
+| **0.12** | **0%** | **71%** | **0%** | **29%** | **71%** |
+| 0.15 | 0% | 57% | 0% | 14% | 57% |
+
+0.10 tampoco tuvo falsas alarmas, pero queda pegado al peor día normal (0.099) y con 31 días no sé cuánto más puede moverse un sábado; 0.12 deja un margen de 20% y todavía ve la mayoría de los días con la demanda a la mitad o 50% más alta. Con una ventana de un día, la alerta llega al cierre del día, igual que el MAE diario; su ventaja es que no necesita la verdad, y que dice **qué** cambió.
+
+### Qué no detecta esta alerta
+
+- **La deriva conceptual, nunca:** con las salidas ×1.5 el PSI es el de un día normal (0.03) mientras el MAE sube de 1.03 a 1.57 y el costo asimétrico casi se duplica. Eso solo lo ve la alerta del MAE y del costo de arriba.
+- **Cambios moderados de demanda:** al 75% no alerta nunca, y al 125%, solo 2 de 7 días. La subida es la que importa, porque **empeora** el modelo (MAE 1.31, costo 2.80, ya sobre su umbral semanal de 2.30); la bajada lo mejora (MAE 0.88), porque hay menos salidas que errar.
+- **Cambios en lo que no vigila:** una estación nueva, otra capacidad, o el reparto de la demanda entre estaciones y horas con el mismo total. El monitor mira la distribución de dos conteos sobre todas las estaciones juntas.
+
+**La regla con las dos alertas:** si el PSI alerta y el MAE no, es deriva de datos que el modelo absorbe (como un día de lluvia): se anota y se mira si sigue. Si el MAE alerta y el PSI no, es deriva conceptual: hay que reentrenar con datos recientes. Si alertan las dos, cambió la demanda y el modelo no la sigue (como un evento): se revisa qué pasó y se reentrena con datos que la incluyan.

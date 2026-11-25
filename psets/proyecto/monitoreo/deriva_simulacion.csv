@@ -1,0 +1,10 @@
+escenario,psi_salidas_ultima_hora,psi_llegadas,mae,costo_asimetrico
+datos: demanda al 100%,0.0299,0.016,1.0255,2.0879
+datos: demanda al 75%,0.0415,0.0206,0.8799,1.6754
+datos: demanda al 50%,0.2076,0.1019,0.7275,1.2609
+datos: demanda al 125%,0.0815,0.0531,1.3118,2.8044
+datos: demanda al 150%,0.1826,0.1434,1.569,3.4666
+conceptual: salidas x1.0,0.0299,0.016,1.0255,2.0879
+conceptual: salidas x1.1,0.0299,0.016,1.1136,2.4226
+conceptual: salidas x1.25,0.0299,0.016,1.2689,2.9709
+conceptual: salidas x1.5,0.0299,0.016,1.5699,3.9693

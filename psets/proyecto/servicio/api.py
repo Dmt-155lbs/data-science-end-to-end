@@ -5,7 +5,8 @@ Recibe una franja de 15 minutos de una estacion, como la conoce quien llama
 estima que salen en los proximos 30 minutos. Ademas mide la latencia y el
 codigo de cada prediccion (/metricas) y guarda cada prediccion en
 monitoreo/predicciones.jsonl, para unirla despues con las salidas reales
-(monitoreo/desempeno.py). Desde psets/proyecto/, despues de
+(monitoreo/desempeno.py), y vigila la deriva de datos de lo que recibe
+(/deriva, servicio/deriva.py). Desde psets/proyecto/, despues de
 python servicio/exportar_modelo.py:
 
     uvicorn servicio.api:app --port 8000
@@ -26,16 +27,23 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from modelado.pipeline_proyecto import CATEGORICAS, NUMERICAS, YA_LISTAS, agregar_calendario, agregar_features
+from servicio.deriva import MonitorDeDeriva
 
 CARPETA = Path(__file__).resolve().parent
 RUTA_MODELO = Path(os.environ.get("RUTA_MODELO", CARPETA / "modelo.joblib"))
 RUTA_VERSION = CARPETA / "modelo_version.txt"
 RUTA_REGISTRO = Path(os.environ.get("RUTA_REGISTRO", CARPETA.parent / "monitoreo" / "predicciones.jsonl"))
+RUTA_REFERENCIA = CARPETA / "referencia_deriva.json"
 
 # El modelo y su version del registro (ecobici-rebalanceo@produccion, los dos
 # exportados por exportar_modelo.py) se cargan una sola vez, al arrancar.
 modelo = joblib.load(RUTA_MODELO) if RUTA_MODELO.exists() else None
 version_servida = RUTA_VERSION.read_text(encoding="utf-8").strip() if RUTA_VERSION.exists() else None
+
+# La distribucion de entrenamiento de las features vigiladas (la escribe
+# monitoreo/simular_deriva.py). Sin ella, /deriva lo dice y /predecir sigue.
+monitor = (MonitorDeDeriva(json.loads(RUTA_REFERENCIA.read_text(encoding="utf-8")))
+           if RUTA_REFERENCIA.exists() else None)
 
 
 class Metricas:
@@ -107,6 +115,16 @@ def ver_metricas():
     return metricas.resumen()
 
 
+@app.get("/deriva")
+def ver_deriva():
+    """El PSI de la ventana actual (el ultimo dia de franjas) contra
+    entrenamiento, y si hay alerta de deriva de datos."""
+    if monitor is None:
+        return {"franjas_en_ventana": 0, "umbral": None, "psi": {}, "alerta": False,
+                "detalle": "sin referencia de deriva"}
+    return monitor.estado()
+
+
 @app.post("/predecir")
 def predecir(franja: Franja):
     # Las mismas features del entrenamiento, con las funciones de pipeline_proyecto.
@@ -127,6 +145,8 @@ def predecir(franja: Franja):
             **franja.model_dump(mode="json"),
             "salidas_prox_30m": salidas,
         }) + "\n")
+    if monitor is not None:
+        monitor.registrar(franja.model_dump())
 
     return {
         "id_prediccion": id_prediccion,

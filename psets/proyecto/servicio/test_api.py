@@ -19,6 +19,7 @@ from sklearn.pipeline import Pipeline
 
 from modelado.pipeline_proyecto import CATEGORICAS, NUMERICAS, YA_LISTAS, agregar_calendario, agregar_features, construir_preparacion
 from servicio import api
+from servicio.deriva import MonitorDeDeriva
 
 FRANJA = {
     "estacion_codigo": "271-272",
@@ -31,6 +32,14 @@ FRANJA = {
     "salidas_lag_15m": 3,
     "salidas_ultima_hora": 9,
     "salidas_mismo_momento_ayer": 5,
+}
+
+
+# Una referencia de deriva inventada: la mitad de las franjas con 0 salidas en
+# la ultima hora y la otra mitad con mas; lo mismo con las llegadas.
+REFERENCIA = {
+    "salidas_ultima_hora": {"cortes": [0.0], "proporciones": [0.5, 0.5]},
+    "llegadas": {"cortes": [0.0], "proporciones": [0.5, 0.5]},
 }
 
 
@@ -48,6 +57,7 @@ def cliente(tmp_path, monkeypatch):
     monkeypatch.setattr(api, "version_servida", "7")
     monkeypatch.setattr(api, "RUTA_REGISTRO", tmp_path / "predicciones.jsonl")
     monkeypatch.setattr(api, "metricas", api.Metricas())
+    monkeypatch.setattr(api, "monitor", MonitorDeDeriva(REFERENCIA, ventana=4, umbral=0.10))
     return TestClient(api.app)
 
 
@@ -121,3 +131,25 @@ def test_calendario_igual_que_en_entrenamiento():
     datos = agregar_calendario(pd.DataFrame({"fecha": ["2026-08-01", "2026-08-03"]}))
     assert list(datos["dia_semana"]) == [6, 1]
     assert list(datos["es_fin_de_semana"]) == [True, False]
+
+
+def test_deriva_sin_alerta_con_ventana_parecida_a_la_referencia(cliente):
+    for salidas_ultima_hora, llegadas in [(0, 0), (9, 2), (0, 0), (5, 3)]:
+        cliente.post("/predecir", json={**FRANJA, "salidas_ultima_hora": salidas_ultima_hora, "llegadas": llegadas})
+    estado = cliente.get("/deriva").json()
+    assert estado["franjas_en_ventana"] == 4
+    assert estado["psi"] == {"salidas_ultima_hora": 0.0, "llegadas": 0.0}
+    assert estado["alerta"] is False
+
+
+def test_deriva_alerta_con_ventana_alejada_de_la_referencia(cliente):
+    # Un dia de lluvia: casi nadie sale y todas las franjas llegan con 0
+    # salidas en la ultima hora. Con la ventana a medias no alerta; llena, si.
+    for _ in range(3):
+        cliente.post("/predecir", json={**FRANJA, "salidas_ultima_hora": 0})
+    assert cliente.get("/deriva").json()["alerta"] is False
+    cliente.post("/predecir", json={**FRANJA, "salidas_ultima_hora": 0})
+    estado = cliente.get("/deriva").json()
+    assert estado["franjas_en_ventana"] == 4
+    assert estado["psi"]["salidas_ultima_hora"] > 0.10
+    assert estado["alerta"] is True
