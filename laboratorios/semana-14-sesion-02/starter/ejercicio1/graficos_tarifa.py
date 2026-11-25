@@ -26,7 +26,13 @@ viajes["diferencia"] = viajes["tarifa_cobrada"] - viajes["tarifa_estimada"]
 # error), "pagan_20_mas" (fraccion de viajes en que la tarifa cobrada
 # supera en mas de 20% a la estimada) y "diferencia" (promedio de
 # diferencia, en dolares). Redondea a 3 decimales.
-resumen = pd.DataFrame(columns=["viajes", "mae", "pagan_20_mas", "diferencia"])
+viajes["pagan_20_mas"] = viajes["tarifa_cobrada"] > 1.20 * viajes["tarifa_estimada"]
+resumen = viajes.groupby("semana", sort=False).agg(
+    viajes=("error", "size"),
+    mae=("error", "mean"),
+    pagan_20_mas=("pagan_20_mas", "mean"),
+    diferencia=("diferencia", "mean"),
+).round(3)
 print(resumen.to_string())
 
 # El grafico tecnico: el MAE por semana, separado por tipo de tarifa, con
@@ -37,6 +43,13 @@ figura, eje = plt.subplots(figsize=(7, 4))
 # TODO 2: barras agrupadas con por_tipo.plot(kind="bar", ax=eje), una linea
 # horizontal en MAE_PRUEBA (eje.axhline, punteada, con label), la
 # leyenda, y titulo y ejes que digan que se mide y en que unidad.
+por_tipo.plot(kind="bar", ax=eje, color=["#4C72B0", "#A0A0A0"])
+eje.axhline(MAE_PRUEBA, linestyle="--", color="black", label=f"MAE en prueba ({MAE_PRUEBA})")
+eje.legend()
+eje.set_title("Error absoluto medio de la version 1 por semana y tipo de tarifa (noviembre)")
+eje.set_xlabel("Semana (lunes)")
+eje.set_ylabel("MAE (dolares)")
+eje.tick_params(axis="x", rotation=0)
 figura.tight_layout()
 figura.savefig("grafico_tecnico.png", dpi=150)
 
@@ -46,6 +59,17 @@ figura, eje = plt.subplots(figsize=(7, 4))
 # de 20% sobre lo estimado (resumen["pagan_20_mas"] * 100), las dos
 # ultimas semanas de otro color, el valor encima de cada barra, y un
 # titulo que diga la conclusion, no la metrica.
+porcentaje = resumen["pagan_20_mas"] * 100
+colores = ["#A0A0A0"] * (len(porcentaje) - 2) + ["#C44E52"] * 2
+barras = eje.bar(resumen.index, porcentaje, color=colores)
+for barra, valor in zip(barras, porcentaje):
+    eje.text(barra.get_x() + barra.get_width() / 2, valor + 0.5, f"{valor:.0f}%", ha="center", va="bottom")
+eje.set_title("Desde el 16 de noviembre, casi la mitad de los pasajeros\npaga mas de 20% sobre la tarifa que les estimamos")
+eje.set_xlabel("Semana (lunes)")
+eje.set_ylabel("Pasajeros que pagaron 20% mas (%)")
+eje.set_ylim(0, max(porcentaje) * 1.2 + 1)
+for lado in ["top", "right"]:
+    eje.spines[lado].set_visible(False)
 figura.tight_layout()
 figura.savefig("grafico_ejecutivo.png", dpi=150)
 print("Graficos guardados: grafico_tecnico.png y grafico_ejecutivo.png")

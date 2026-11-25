@@ -37,41 +37,46 @@ def semanas_maduras(predicciones, contracargos, hoy):
 def errores_por_semana(pagos):
     """Por semana: "fraudes", "no_detectados" (fraudes con revisar == 0) y
     "falsas_alarmas" (pagos legitimos con revisar == 1)."""
-    # TODO 1: agrega dos columnas booleanas a una copia de pagos
-    # (no_detectado y falsa_alarma) y suma por semana las tres cosas.
-    return pd.DataFrame(columns=["fraudes", "no_detectados", "falsas_alarmas"])
+    pagos = pagos.copy()
+    pagos["no_detectado"] = pagos["es_fraude"] & (pagos["revisar"] == 0)
+    pagos["falsa_alarma"] = ~pagos["es_fraude"] & (pagos["revisar"] == 1)
+    return pagos.groupby("semana").agg(
+        fraudes=("es_fraude", "sum"),
+        no_detectados=("no_detectado", "sum"),
+        falsas_alarmas=("falsa_alarma", "sum"),
+    )
 
 
 def costo_por_semana(errores):
     """Agrega a una copia las columnas "costo_fraude", "costo_revisiones" y
     "costo_total", en dolares."""
-    # TODO 2: cada columna es la cantidad por su costo; el total, la suma.
-    return errores
+    costos = errores.copy()
+    costos["costo_fraude"] = costos["no_detectados"] * COSTO_FRAUDE_NO_DETECTADO
+    costos["costo_revisiones"] = costos["falsas_alarmas"] * COSTO_FALSA_ALARMA
+    costos["costo_total"] = costos["costo_fraude"] + costos["costo_revisiones"]
+    return costos
 
 
 def costo_normal(costos):
     """El costo total promedio de las semanas antes del cambio (las dos
     primeras semanas de la tabla)."""
-    # TODO 3: el promedio de costo_total de las dos primeras filas.
-    return 0.0
+    return float(costos["costo_total"].iloc[:2].mean())
 
 
 def frase_ejecutiva(costos):
     """Una oracion para la gerencia sobre la ultima semana madura."""
-    # Arma la oracion: "La semana del <semana>, el fraude que no detectamos
-    # y las revisiones costaron <costo> dolares, <veces> veces una semana
-    # normal." con la ultima fila de costos, el costo redondeado sin
-    # decimales y las veces con un decimal.
-    return ""
+    semana = costos.index[-1]
+    costo = costos["costo_total"].iloc[-1]
+    veces = costo / costo_normal(costos)
+    return (f"La semana del {semana}, el fraude que no detectamos y las revisiones "
+            f"costaron {round(costo)} dolares, {veces:.1f} veces una semana normal.")
 
 
 def costo_de_un_mes_asi(costos):
     """Lo que costaria un mes (4 semanas) como la ultima semana madura,
     menos lo que costaria un mes normal: lo que esta en juego si no se hace
     nada."""
-    # Cuatro veces la diferencia entre el costo total de la ultima semana y
-    # el costo normal, redondeado sin decimales.
-    return 0
+    return round(4 * (costos["costo_total"].iloc[-1] - costo_normal(costos)))
 
 
 if __name__ == "__main__":

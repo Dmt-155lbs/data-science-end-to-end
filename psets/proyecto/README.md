@@ -72,3 +72,5 @@ El servicio (`servicio/api.py`, FastAPI) recibe una franja de 15 minutos de una 
    ```
 
    `/salud` responde `{"estado":"ok","modelo_cargado":true,"version_modelo":"1"}`. Una hora fuera de 0 a 23 o una capacidad de 0 reciben 422 antes de llegar al modelo. Las pruebas (`servicio/test_api.py`) corren con `pytest psets/proyecto` en cada push.
+
+4. **Monitoreo.** `/metricas` da la latencia y los errores; `/deriva`, el PSI del último día de franjas recibidas contra entrenamiento (`salidas_ultima_hora` y `llegadas`) y si pasa el umbral de 0.12. La referencia (`servicio/referencia_deriva.json`) y el umbral salen de `python -m monitoreo.simular_deriva`; las métricas, los umbrales y lo que cada alerta no ve están en [`docs/monitoreo.md`](docs/monitoreo.md). Los resultados, para el equipo de datos y para quien decide, están en [`docs/resultados_tecnico.pdf`](docs/resultados_tecnico.pdf) y [`docs/resultados_ejecutivo.pdf`](docs/resultados_ejecutivo.pdf) (`python docs/diapositivas_resultados.py`).
